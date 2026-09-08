@@ -29,9 +29,16 @@ Scheduler / Manual Run
 
 ## ARPA additions
 
+Present in the M1 core:
+
 ```text
 lib/domain/listing/*
 lib/providers/core/*
+```
+
+Planned/implemented by subsequent M1 tasks and not part of the provider-core PR itself:
+
+```text
 lib/providers/adapters/*
 lib/clients/realtor/*
 lib/filtering/*
