@@ -23,6 +23,8 @@ describe('Custom Source Builder UI integration', () => {
     expect(page).to.include('coverageRowsFromReport');
     expect(page).to.include('report.preview');
     expect(page).to.include('activation.canEnable');
+    expect(page).to.include('isSourceFormDirty');
+    expect(page).to.include('unsavedChanges');
 
     for (const endpoint of ["'/api/sources'", '`/api/sources/${sourceId}/test`', '`/api/sources/${sourceId}/status`']) {
       expect(api).to.include(endpoint);
