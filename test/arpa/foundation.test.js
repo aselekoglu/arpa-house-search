@@ -31,4 +31,19 @@ describe('ARPA foundation', () => {
     expect(baseline).to.include('2a815c92e6da9cceb9633fb5b96086897a245c35');
     expect(baseline).to.include('license at this commit: MIT');
   });
+
+  it('exports the initial ARPA UI primitive contract', () => {
+    const primitives = read('ui/src/components/arpa/index.js');
+    for (const component of [
+      'ArpaBadge',
+      'ArpaButton',
+      'ArpaDivider',
+      'ArpaInput',
+      'ArpaPageHeader',
+      'ArpaPanel',
+      'ArpaSelect',
+    ]) {
+      expect(primitives).to.include(component);
+    }
+  });
 });

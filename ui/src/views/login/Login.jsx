@@ -1,10 +1,11 @@
 import React from 'react';
 
 import Logo from '../../components/logo/Logo';
+import { ArpaButton, ArpaInput } from '../../components/arpa';
 import { xhrPost } from '../../services/xhr';
 import { useNavigate } from 'react-router-dom';
 import { useActions, useSelector } from '../../services/state/store';
-import { Input, Button, Banner, Toast } from '@douyinfe/semi-ui';
+import { Banner, Toast } from '@douyinfe/semi-ui';
 
 import './login.less';
 import { IconUser, IconLock } from '@douyinfe/semi-icons';
@@ -55,28 +56,25 @@ export default function Login() {
       <form className="login__form" onSubmit={(event) => event.preventDefault()}>
         <div className="login__formLabel">SIGN IN</div>
         {error && <Banner type="danger" closeIcon={null} description={error} />}
-        <Input
-          size="large"
+        <ArpaInput
           prefix={<IconUser />}
           placeholder="Username"
           value={username}
-          showClear
           autoFocus
-          onChange={(value) => setUserName(value)}
-          onKeyPress={async (event) => event.key === 'Enter' && (await tryLogin())}
+          autoComplete="username"
+          onChange={setUserName}
+          onKeyDown={async (event) => event.key === 'Enter' && (await tryLogin())}
         />
-        <Input
-          size="large"
-          mode="password"
+        <ArpaInput
+          type="password"
           prefix={<IconLock />}
           value={password}
           placeholder="Password"
-          onChange={(value) => setPassword(value)}
-          onKeyPress={async (event) => event.key === 'Enter' && (await tryLogin())}
+          autoComplete="current-password"
+          onChange={setPassword}
+          onKeyDown={async (event) => event.key === 'Enter' && (await tryLogin())}
         />
-        <Button type="primary" onClick={tryLogin} theme="solid" size="large">
-          Login
-        </Button>
+        <ArpaButton onClick={tryLogin}>Login</ArpaButton>
         {demoMode && (
           <Banner
             fullMode={true}
