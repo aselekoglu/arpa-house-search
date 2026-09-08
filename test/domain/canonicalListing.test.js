@@ -58,6 +58,13 @@ describe('Canonical Listing v1', () => {
     expect(listing.id).to.equal(mod.canonicalListingId('realtor-ca', '28123456'));
   });
 
+  it('keeps composite identity unambiguous when ids contain delimiters', async () => {
+    const mod = await loadCanonicalModule();
+    if (!mod) return;
+
+    expect(mod.canonicalListingId('a:b', 'c')).to.not.equal(mod.canonicalListingId('a', 'b:c'));
+  });
+
   it('defaults optional scalar fields to null and timestamps to now', async () => {
     const mod = await loadCanonicalModule();
     if (!mod) return;
