@@ -34,6 +34,7 @@ jobs:
           test/providers/providerRegistry.test.js
           test/clients/realtor/realtorClient.test.js
           test/providers/realtorCaAdapter.test.js
+          test/fixtures/realtorFixtures.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
