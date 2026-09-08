@@ -30,7 +30,7 @@ export default function Login() {
 
     try {
       await xhrPost('/api/login', { username: username.trim(), password });
-    } catch (ignored) {
+    } catch {
       Toast.error('Login unsuccessful…');
       return;
     }

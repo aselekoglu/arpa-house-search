@@ -1,0 +1,30 @@
+name: ARPA Foundation
+
+on:
+  push:
+    branches:
+      - 'arpa/**'
+  workflow_dispatch:
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn build:frontend
+      - name: Deterministic core tests
+        run: >-
+          node --import ./test/esmock-loader.mjs ./node_modules/mocha/bin/mocha.js
+          --timeout 60000
+          test/storage/SqliteConnection.test.js
+          test/db/migrations/migrate.test.js
+          test/similarity/similarityCache.test.js
+          test/utils/utils.test.js
