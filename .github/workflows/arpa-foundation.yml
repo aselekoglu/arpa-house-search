@@ -37,6 +37,8 @@ jobs:
           test/fixtures/realtorFixtures.test.js
           test/providers/customSourceRecipe.test.js
           test/providers/staticCustomSourceExtractor.test.js
+          test/providers/browserCustomSourceExtractor.test.js
+          test/providers/browserCustomSourceNetworkSafety.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
