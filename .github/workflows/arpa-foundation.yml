@@ -40,6 +40,8 @@ jobs:
           test/providers/browserCustomSourceExtractor.test.js
           test/providers/browserCustomSourceNetworkSafety.test.js
           test/services/customSources/sourceTestService.test.js
+          test/services/customSources/sourceLifecycleService.test.js
+          test/storage/customSourceMigration.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
