@@ -1,0 +1,18 @@
+{
+  "SubArea": [
+    {
+      "Location": "Ottawa, Ontario",
+      "GEOId": "g30_d2c8",
+      "Viewport": {
+        "NorthEast": {
+          "Latitude": 45.55,
+          "Longitude": -75.35
+        },
+        "SouthWest": {
+          "Latitude": 45.2,
+          "Longitude": -76.0
+        }
+      }
+    }
+  ]
+}

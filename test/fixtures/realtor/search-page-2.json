@@ -1,0 +1,17 @@
+{
+  "Results": [
+    {
+      "Id": 28130001,
+      "MlsNumber": "X3000001",
+      "RelativeDetailsURL": "/real-estate/28130001/page-two-example-one"
+    },
+    {
+      "Id": 28130002,
+      "MlsNumber": "X3000002",
+      "RelativeDetailsURL": "/real-estate/28130002/page-two-example-two"
+    }
+  ],
+  "Paging": {
+    "TotalRecords": 8
+  }
+}
