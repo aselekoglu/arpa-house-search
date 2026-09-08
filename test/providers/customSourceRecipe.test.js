@@ -134,6 +134,7 @@ describe('Custom Source Recipe v1', () => {
       'http://192.168.1.5/listings',
       'http://169.254.169.254/latest/meta-data',
       'http://[::1]/listings',
+      'http://[::ffff:127.0.0.1]/listings',
       'http://[fc00::1]/listings',
       'http://[fe80::1]/listings',
     ];
@@ -143,6 +144,19 @@ describe('Custom Source Recipe v1', () => {
         .to.throw(mod.CustomSourceRecipeError)
         .with.property('field', 'url');
     }
+  });
+
+  it('allows practical source URLs longer than selector strings while keeping an explicit URL bound', async () => {
+    const mod = await loadRecipeModule();
+    if (!mod) return;
+
+    const longUrl = `https://rentals.example.com/ottawa?query=${'a'.repeat(600)}`;
+    expect(mod.validateCustomSourceRecipe(validStaticRecipe({ url: longUrl })).url).to.equal(longUrl);
+
+    const oversizedUrl = `https://rentals.example.com/ottawa?query=${'a'.repeat(4_100)}`;
+    expect(() => mod.validateCustomSourceRecipe(validStaticRecipe({ url: oversizedUrl })))
+      .to.throw(mod.CustomSourceRecipeError)
+      .with.property('field', 'url');
   });
 
   it('requires bounded and internally consistent pagination', async () => {
