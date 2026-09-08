@@ -1,43 +1,27 @@
 .app {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
+  background: var(--arpa-bg);
+  color: var(--arpa-ink);
 
   &__content {
-    margin: 1rem;
+    width: min(var(--arpa-content-max), 100%);
+    margin: 0 auto;
+    padding: 1.5rem var(--arpa-gutter) 3rem;
   }
 }
 
-.ui.inverted.segment {
-  background: #31303078 !important;
-}
-
-.ui.black.label,
-.ui.black.labels .label {
-  background-color: #31303078 !important;
-}
-
-a:link {
-  color: #54a9ff;
-  background-color: transparent;
-  text-decoration: none;
-}
-
+a:link,
 a:visited {
-  color: #54a9ff;
-  background-color: transparent;
-  text-decoration: none;
+  color: var(--arpa-accent);
+  background: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
 }
 
-a:hover {
-  color: #54a9ff;
-  background-color: transparent;
-  text-decoration: underline;
-}
-
+a:hover,
 a:active {
-  color: #54a9ff;
-  background-color: transparent;
-  text-decoration: underline;
+  color: var(--arpa-accent-hover);
 }
 
 .semi-icon:not(.semi-tabs-bar .semi-tabs-tab .semi-icon) {

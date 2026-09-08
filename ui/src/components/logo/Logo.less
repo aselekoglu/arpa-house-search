@@ -1,5 +1,50 @@
-.logo {
-  position: absolute;
-  top: 0.1rem;
-  right: 2rem;
+.arpaLogo {
+  --arpa-lockup-width: auto;
+  display: inline-flex;
+  width: var(--arpa-lockup-width);
+  align-items: center;
+  gap: 0.72rem;
+  color: var(--arpa-ink);
+  line-height: 1;
+
+  &__icon {
+    display: block;
+    width: 2.15rem;
+    height: 2.65rem;
+    flex: 0 0 auto;
+    background: currentColor;
+    -webkit-mask: url('https://raw.githubusercontent.com/aselekoglu/arpa-meal-planner/main/public/arpa-icon.svg') center / contain no-repeat;
+    mask: url('https://raw.githubusercontent.com/aselekoglu/arpa-meal-planner/main/public/arpa-icon.svg') center / contain no-repeat;
+  }
+
+  &__wordmark {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    letter-spacing: 0.03em;
+
+    strong {
+      font-family: var(--arpa-font-ui);
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+    }
+
+    span {
+      font-family: var(--arpa-font-mono);
+      color: var(--arpa-muted);
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      white-space: nowrap;
+    }
+  }
+
+  &--compact {
+    justify-content: center;
+
+    .arpaLogo__icon {
+      width: 1.7rem;
+      height: 2.1rem;
+    }
+  }
 }

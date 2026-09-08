@@ -8,11 +8,11 @@ import { initVChartSemiTheme } from '@visactor/vchart-semi-theme';
 import App from './App';
 import './Index.less';
 
-const container = document.getElementById('fredy');
+const container = document.getElementById('arpa');
 const root = createRoot(container);
 
 initVChartSemiTheme({
-  defaultMode: 'dark',
+  defaultMode: 'light',
 });
 
 root.render(

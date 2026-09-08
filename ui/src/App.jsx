@@ -13,21 +13,17 @@ import Users from './views/user/Users';
 import Jobs from './views/jobs/Jobs';
 
 import './App.less';
-import TrackingModal from './components/tracking/TrackingModal.jsx';
-import { Banner, Divider } from '@douyinfe/semi-ui';
-import VersionBanner from './components/version/VersionBanner.jsx';
+import { Banner, Divider, Layout } from '@douyinfe/semi-ui';
 import Listings from './views/listings/Listings.jsx';
 import Navigation from './components/navigation/Navigation.jsx';
-import { Layout } from '@douyinfe/semi-ui';
-import FredyFooter from './components/footer/FredyFooter.jsx';
+import ArpaFooter from './components/footer/ArpaFooter.jsx';
 import ProcessingTimes from './views/jobs/ProcessingTimes.jsx';
 import WatchlistManagement from './views/listings/management/WatchlistManagement.jsx';
 
-export default function FredyApp() {
+export default function ArpaHouseSearchApp() {
   const actions = useActions();
   const [loading, setLoading] = React.useState(true);
   const currentUser = useSelector((state) => state.user.currentUser);
-  const versionUpdate = useSelector((state) => state.versionUpdate.versionUpdate);
   const settings = useSelector((state) => state.generalSettings.settings);
   const processingTimes = useSelector((state) => state.jobs.processingTimes);
 
@@ -42,7 +38,6 @@ export default function FredyApp() {
         await actions.jobs.getSharableUserList();
         await actions.notificationAdapter.getAdapter();
         await actions.generalSettings.getGeneralSettings();
-        await actions.versionUpdate.getVersionUpdate();
       }
       setLoading(false);
     }
@@ -50,10 +45,7 @@ export default function FredyApp() {
     init();
   }, [currentUser?.userId]);
 
-  const needsLogin = () => {
-    return currentUser == null || Object.keys(currentUser).length === 0;
-  };
-
+  const needsLogin = () => currentUser == null || Object.keys(currentUser).length === 0;
   const isAdmin = () => currentUser != null && currentUser.isAdmin;
   const { Footer, Sider, Content } = Layout;
 
@@ -69,7 +61,6 @@ export default function FredyApp() {
           <Navigation isAdmin={isAdmin()} />
         </Sider>
         <Content>
-          {versionUpdate?.newVersion && <VersionBanner />}
           {settings.demoMode && (
             <>
               <Banner
@@ -77,12 +68,11 @@ export default function FredyApp() {
                 type="info"
                 bordered
                 closeIcon={null}
-                description="You're currently viewing the demo version of Fredy. Jobs won't scrape websites, and any changes you make will be reverted at midnight."
+                description="You're viewing ARPA House Search in demo mode. Search jobs do not crawl live websites and demo changes are reset at midnight."
               />
               <br />
             </>
           )}
-          {settings.analyticsEnabled === null && !settings.demoMode && <TrackingModal />}
           {processingTimes != null && <ProcessingTimes processingTimes={processingTimes} />}
           <Divider />
           <div className="app__content">
@@ -94,8 +84,6 @@ export default function FredyApp() {
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/listings" element={<Listings />} />
               <Route path="/watchlistManagement" element={<WatchlistManagement />} />
-
-              {/* Permission-aware routes */}
               <Route
                 path="/users/new"
                 element={
@@ -128,17 +116,16 @@ export default function FredyApp() {
                   </PermissionAwareRoute>
                 }
               />
-
               <Route path="/" element={<Navigate to="/jobs" replace />} />
             </Routes>
           </div>
         </Content>
       </Layout>
       <Footer>
-        <FredyFooter />
+        <ArpaFooter />
       </Footer>
     </Layout>
   );
 }
 
-FredyApp.displayName = 'FredyApp';
+ArpaHouseSearchApp.displayName = 'ArpaHouseSearchApp';

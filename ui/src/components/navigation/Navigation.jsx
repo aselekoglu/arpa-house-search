@@ -1,8 +1,8 @@
 import React from 'react';
 import { Nav } from '@douyinfe/semi-ui';
 import { IconStar, IconSetting, IconTerminal } from '@douyinfe/semi-icons';
-import logoWhite from '../../assets/logo_white.png';
 import Logout from '../logout/Logout.jsx';
+import Logo from '../logo/Logo.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import './Navigate.less';
@@ -12,13 +12,12 @@ import { useFeature } from '../../hooks/featureHook.js';
 export default function Navigation({ isAdmin }) {
   const navigate = useNavigate();
   const location = useLocation();
-
   const width = useScreenWidth();
   const collapsed = width <= 850;
   const watchlistFeature = useFeature('WATCHLIST_MANAGEMENT') || false;
 
   const items = [
-    { itemKey: '/jobs', text: 'Jobs', icon: <IconTerminal /> },
+    { itemKey: '/jobs', text: 'Searches', icon: <IconTerminal /> },
     { itemKey: '/listings', text: 'Listings', icon: <IconStar /> },
   ];
 
@@ -46,16 +45,25 @@ export default function Navigation({ isAdmin }) {
 
   return (
     <Nav
-      style={{ height: '100%', width: collapsed ? '' : '13.2rem' }}
+      className="navigate"
+      style={{
+        height: '100%',
+        width: collapsed ? '68px' : '220px',
+        minWidth: collapsed ? '68px' : '220px',
+        background: 'var(--arpa-surface)',
+        borderRight: '1px solid var(--arpa-line)',
+      }}
       items={items}
       isCollapsed={collapsed}
       selectedKeys={[parsePathName(location.pathname)]}
-      onSelect={(key) => {
-        navigate(key.itemKey);
-      }}
-      header={<img src={logoWhite} width="180" alt="Fredy Logo" />}
+      onSelect={(key) => navigate(key.itemKey)}
+      header={
+        <div className="navigate__brand">
+          <Logo compact={collapsed} />
+        </div>
+      }
       footer={
-        <div className="navigate__logout_Button">
+        <div className="navigate__logoutButton">
           <Logout text={!collapsed} />
         </div>
       }
