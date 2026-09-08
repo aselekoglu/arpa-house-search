@@ -8,18 +8,14 @@ import { duringWorkingHoursOrNotSet } from './lib/utils.js';
 import { runMigrations } from './lib/services/storage/migrations/migrate.js';
 import { ensureDemoUserExists, ensureAdminUserExists } from './lib/services/storage/userStorage.js';
 import { cleanupDemoAtMidnight } from './lib/services/crons/demoCleanup-cron.js';
-import { initTrackerCron } from './lib/services/crons/tracker-cron.js';
 import logger from './lib/services/logger.js';
 import { bus } from './lib/services/events/event-bus.js';
 import { initActiveCheckerCron } from './lib/services/crons/listing-alive-cron.js';
 import { getSettings } from './lib/services/storage/settingsStorage.js';
 import SqliteConnection from './lib/services/storage/SqliteConnection.js';
 
-//in the config, we store the path of the sqlite file, thus we must check if it is available
 const isConfigAccessible = await checkIfConfigIsAccessible();
 await SqliteConnection.init();
-
-// Load configuration before any other startup steps
 await refreshConfig();
 
 if (!isConfigAccessible) {
@@ -27,12 +23,9 @@ if (!isConfigAccessible) {
   process.exit(1);
 }
 
-// Run DB migrations once at startup and block until finished
 await runMigrations();
 
 const settings = await getSettings();
-
-// Ensure sqlite directory exists before loading anything else (based on config.sqlitepath)
 const rawDir = settings.sqlitepath || '/db';
 const relDir = rawDir.startsWith('/') ? rawDir.slice(1) : rawDir;
 const absDir = path.isAbsolute(relDir) ? relDir : path.join(process.cwd(), relDir);
@@ -40,16 +33,13 @@ if (!fs.existsSync(absDir)) {
   fs.mkdirSync(absDir, { recursive: true });
 }
 
-// Load provider modules once at startup
 const providers = await getProviders();
 
 similarityCache.initSimilarityCache();
 similarityCache.startSimilarityCacheReloader();
 
-//assuming interval is always in minutes
 const INTERVAL = settings.interval * 60 * 1000;
 
-// Initialize API only after migrations completed
 await import('./lib/api/api.js');
 
 if (settings.demoMode) {
@@ -57,16 +47,14 @@ if (settings.demoMode) {
   cleanupDemoAtMidnight();
 }
 
-logger.info(`Started Fredy successfully. Ui can be accessed via http://localhost:${settings.port}`);
+logger.info(`Started ARPA House Search successfully. UI: http://localhost:${settings.port}`);
 
 ensureAdminUserExists();
 ensureDemoUserExists();
-await initTrackerCron();
-//do not wait for this to finish, let it run in the background
 initActiveCheckerCron();
 
 bus.on('jobs:runAll', () => {
-  logger.debug('Running Fredy Job manually');
+  logger.debug('Running ARPA search jobs manually');
   execute();
 });
 
@@ -100,5 +88,4 @@ const execute = () => {
 };
 
 setInterval(execute, INTERVAL);
-//start once at startup
 execute();
