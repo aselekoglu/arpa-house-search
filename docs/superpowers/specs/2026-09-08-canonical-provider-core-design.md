@@ -11,6 +11,7 @@ This design implements M1 workboard tasks #6 (Canonical Listing v1) and #7 (Prov
 - Make provider discovery, normalization, details, and health-check capabilities explicit.
 - Resolve a provider by stable id or known URL/domain without UI logic.
 - Preserve raw provider payloads so normalization can evolve independently from crawling.
+- Allow config-driven providers to operate without claiming a fixed domain.
 
 ## Canonical Listing v1
 
@@ -24,23 +25,23 @@ A canonical listing is a plain object with these fields:
   url,                // absolute listing URL
   title,              // string|null
   price,              // finite number|null
-  currency,           // ISO-like uppercase code|null, e.g. "CAD"
+  currency,           // uppercase code|null, e.g. "CAD"
   beds,               // finite number|null
   baths,              // finite number|null
-  address,             // formatted address string|null
-  latitude,            // finite number|null
-  longitude,           // finite number|null
-  imageUrl,            // absolute/relative provider image URL|string|null
-  description,         // string|null
-  firstSeen,           // epoch milliseconds
-  lastSeen,            // epoch milliseconds; >= firstSeen
-  raw                  // provider payload or null
+  address,            // formatted address string|null
+  latitude,           // finite number|null
+  longitude,          // finite number|null
+  imageUrl,           // string|null
+  description,        // string|null
+  firstSeen,          // epoch milliseconds
+  lastSeen,           // epoch milliseconds; >= firstSeen
+  raw                 // provider payload or null
 }
 ```
 
 Required source identity fields are `providerId`, `sourceListingId`, and `url`. The canonical `id` is deterministic and does not include mutable listing fields such as price, so a price change does not create a new home.
 
-The constructor/normalizer is responsible for safe scalar coercion, default timestamps, coordinate range validation, and a defensive clone of JSON-compatible `raw` data. Invalid required identity or invalid timestamps throw a `CanonicalListingError` before the listing reaches storage.
+The constructor/normalizer performs safe scalar coercion, default timestamps, coordinate range validation, and a defensive structured clone of `raw` data. Invalid required identity or timestamps throw a `CanonicalListingError` before the listing reaches storage.
 
 ## Provider Adapter Contract
 
@@ -50,7 +51,7 @@ A new ARPA provider adapter is a stateless object:
 {
   id: 'realtor-ca',
   name: 'Realtor.ca',
-  domains: ['realtor.ca'],
+  domains: ['realtor.ca'], // optional; []/omitted for config-driven providers
   capabilities: {
     discover: true,
     normalize: true,
@@ -69,6 +70,8 @@ No adapter receives configuration through mutable module state. Search profile a
 
 `discover` returns provider-native records. `normalize` maps exactly one provider-native record to Canonical Listing v1. This separation keeps transport failures and mapping failures independently testable.
 
+Fixed `domains` are optional. Dedicated providers such as Realtor.ca use them for URL auto-resolution. Generic providers such as Custom Source can omit them and be selected explicitly from source configuration.
+
 ## Provider Registry
 
 `ProviderRegistry` owns adapter registration and lookup, not crawling. It:
@@ -76,35 +79,26 @@ No adapter receives configuration through mutable module state. Search profile a
 - validates the adapter contract at registration time;
 - rejects duplicate ids and duplicate normalized domain ownership;
 - returns adapters by id;
-- resolves `https://...` URLs by hostname, including subdomains of registered domains;
-- reports adapter metadata/capabilities without exposing implementation internals;
+- resolves URLs by hostname/subdomain only for providers declaring fixed domains;
+- reports immutable adapter metadata/capabilities without exposing implementation methods;
 - runs health checks and converts thrown errors into structured unhealthy results;
-- can load a list of adapter modules/objects without depending on frontend code.
+- can load adapter objects or modules with default/provider exports without depending on frontend code.
 
 The registry must not special-case `realtor-ca`, `custom-source`, or any future provider id.
 
 ## Legacy Boundary
 
-The existing MIT Fredy providers under `lib/provider/` remain untouched in this task. New ARPA providers live under `lib/providers/adapters/` and use the new contract. A later compatibility task may wrap legacy providers if retaining them has product value; new core code must not depend on their mutable `init()` convention.
+The existing MIT Fredy providers under `lib/provider/` remain untouched in this task. New ARPA providers live under `lib/providers/adapters/` and use the new contract in `lib/providers/core/`. A later compatibility task may wrap legacy providers if retaining them has product value; new core code must not depend on their mutable `init()` convention.
 
 ## Error Handling
 
 - Canonical listing validation errors identify the invalid field.
-- Provider registration fails synchronously for malformed adapters.
+- Provider registration fails synchronously for malformed adapters or ownership conflicts.
 - Unknown ids/URLs resolve to `null`, not an exception.
-- A health-check exception is returned as `{ healthy: false, error }` and does not abort checks for other providers.
+- A health-check exception is returned as a provider-scoped unhealthy result and does not abort checks for other providers.
 
 ## Testing
 
-Unit tests cover:
+Unit tests cover canonical identity/scalar normalization, timestamp ordering, coordinate validation, raw cloning, adapter validation, optional/fixed domains, duplicate ownership, id/URL resolution, capability metadata, module loading, and health-check isolation.
 
-1. canonical stable identity and scalar normalization;
-2. timestamp defaults and invalid timestamp ordering;
-3. raw payload defensive copy;
-4. adapter contract validation;
-5. duplicate id/domain rejection;
-6. id and URL/domain resolution;
-7. capability metadata;
-8. health-check isolation.
-
-The M1 branch must continue to pass the existing deterministic foundation suite, lint, and frontend build.
+The M1 branch must continue to pass the existing deterministic foundation suite, lint, and frontend production build.
