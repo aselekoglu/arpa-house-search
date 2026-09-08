@@ -1,7 +1,7 @@
 {
-  "name": "fredy",
-  "version": "15.1.1",
-  "description": "[F]ind [R]eal [E]states [d]amn eas[y].",
+  "name": "arpa-house-search",
+  "version": "0.1.0",
+  "description": "ARPA House Search — self-hosted multi-source rental discovery and decision support.",
   "scripts": {
     "prepare": "husky",
     "start:backend": "x-var NODE_ENV=production node index.js",
@@ -26,25 +26,26 @@
     ]
   },
   "main": "index.js",
-  "author": "Christian Kellner",
+  "author": "Ataberk Selekoglu",
   "keywords": [
-    "flat",
-    "flatfinder",
-    "fredy",
-    "real estates",
-    "germany",
+    "real-estate",
     "apartment",
     "house",
     "rent",
-    "immoscout",
+    "rental-search",
     "scraper",
-    "immonet",
-    "immowelt",
-    "immobilienscout24"
+    "ottawa",
+    "canada",
+    "arpa"
   ],
   "bugs": {
-    "url": "https://github.com/orangecoding/fredy/issues"
+    "url": "https://github.com/aselekoglu/arpa-house-search/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aselekoglu/arpa-house-search.git"
+  },
+  "homepage": "https://github.com/aselekoglu/arpa-house-search#readme",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0",
