@@ -7,14 +7,21 @@
 
 Realtor transport and canonical mapping remain separate.
 
+Present in the provider-core work:
+
 ```text
 lib/providers/core/providerContract.js
 lib/providers/core/ProviderRegistry.js
+lib/domain/listing/canonicalListing.js
+```
+
+Planned/implemented by subsequent M1 provider tasks rather than this core PR:
+
+```text
 lib/providers/adapters/realtor-ca.js
 lib/providers/adapters/custom-source.js
 lib/clients/realtor/client.js
 lib/clients/realtor/errors.js
-lib/domain/listing/canonicalListing.js
 ```
 
 ## Adapter boundary
