@@ -31,6 +31,7 @@ jobs:
           --timeout 60000
           test/arpa/foundation.test.js
           test/domain/canonicalListing.test.js
+          test/providers/providerRegistry.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
