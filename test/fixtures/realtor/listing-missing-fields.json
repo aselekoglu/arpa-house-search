@@ -1,0 +1,15 @@
+{
+  "Id": 28129999,
+  "MlsNumber": "X7654321",
+  "RelativeDetailsURL": "/real-estate/28129999/missing-fields-example",
+  "PublicRemarks": null,
+  "Property": {
+    "Price": "$1,995/Monthly",
+    "Type": "Single Family",
+    "Address": {
+      "AddressText": "456 Somerset Street West|Ottawa, Ontario K2P 0J8"
+    },
+    "Photo": []
+  },
+  "Building": {}
+}

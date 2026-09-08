@@ -1,0 +1,17 @@
+{
+  "Results": [
+    {
+      "Id": 28123456,
+      "MlsNumber": "X1234567",
+      "RelativeDetailsURL": "/real-estate/28123456/123-bank-street-ottawa-centretown"
+    },
+    {
+      "Id": 28129999,
+      "MlsNumber": "X7654321",
+      "RelativeDetailsURL": "/real-estate/28129999/missing-fields-example"
+    }
+  ],
+  "Paging": {
+    "TotalRecords": 8
+  }
+}

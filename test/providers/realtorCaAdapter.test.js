@@ -1,33 +1,13 @@
+import { readFileSync } from 'node:fs';
 import { expect } from 'chai';
 import { createCanonicalListing } from '../../lib/domain/listing/canonicalListing.js';
 import { validateProviderAdapter } from '../../lib/providers/core/index.js';
 
 const loadAdapterModule = async () => import('../../lib/providers/adapters/realtor-ca.js').catch(() => null);
+const fixture = (name) => JSON.parse(readFileSync(new URL(`../fixtures/realtor/${name}`, import.meta.url), 'utf8'));
 
 const realtorFixture = (overrides = {}) => ({
-  Id: 28123456,
-  MlsNumber: 'X1234567',
-  RelativeDetailsURL: '/real-estate/28123456/123-bank-street-ottawa-centretown',
-  PublicRemarks: 'Bright south-facing rental close to transit.',
-  Property: {
-    Price: '$2,150/Monthly',
-    Type: 'Single Family',
-    Address: {
-      AddressText: '123 Bank Street|Ottawa, Ontario K1P 1A1',
-      Latitude: '45.415',
-      Longitude: '-75.695',
-    },
-    Photo: [
-      {
-        HighResPath: 'https://cdn.realtor.ca/listing/28123456/high.jpg',
-        MedResPath: 'https://cdn.realtor.ca/listing/28123456/medium.jpg',
-      },
-    ],
-  },
-  Building: {
-    Bedrooms: '2 + 1',
-    BathroomTotal: '1.5',
-  },
+  ...fixture('listing-normal.json'),
   ...overrides,
 });
 
