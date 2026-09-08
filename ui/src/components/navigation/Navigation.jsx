@@ -19,6 +19,7 @@ export default function Navigation({ isAdmin }) {
   const items = [
     { itemKey: '/jobs', text: 'Searches', icon: <IconTerminal /> },
     { itemKey: '/listings', text: 'Listings', icon: <IconStar /> },
+    { itemKey: '/sources', text: 'Sources' },
   ];
 
   if (isAdmin) {

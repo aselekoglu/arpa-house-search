@@ -11,6 +11,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './views/login/Login';
 import Users from './views/user/Users';
 import Jobs from './views/jobs/Jobs';
+import CustomSources from './views/sources/CustomSources.jsx';
 
 import './App.less';
 import { Banner, Divider, Layout } from '@douyinfe/semi-ui';
@@ -83,6 +84,7 @@ export default function ArpaHouseSearchApp() {
               <Route path="/jobs/insights/:jobId" element={<JobInsight />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/listings" element={<Listings />} />
+              <Route path="/sources" element={<CustomSources />} />
               <Route path="/watchlistManagement" element={<WatchlistManagement />} />
               <Route
                 path="/users/new"
