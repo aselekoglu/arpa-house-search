@@ -72,7 +72,7 @@
 - CI adds the two M1 core unit-test files to the deterministic suite without enabling live provider tests.
 
 - [x] **Step 1: Add focused canonical/registry tests to deterministic CI** while preserving install, lint, and frontend build.
-- [x] **Step 2: Push branch and verify the GitHub Actions run is green.** Latest implementation green evidence before docs-only alignment: run `34238733962`.
+- [x] **Step 2: Push branch and verify the GitHub Actions run is green.** Implementation green evidence: run `34238733962`.
 - [x] **Step 3: Update Notion #6 and #7 to Done only after the green run; record branch/verification evidence.**
-- [ ] **Step 4: Commit final docs alignment and verify one final green CI run.**
+- [x] **Step 4: Commit final docs alignment and verify one final green CI run.** Evidence: run `34239260900` passed install, lint, frontend production build, and deterministic foundation/core tests.
 - [ ] **Step 5: Open a PR from `m1/canonical-provider-core` to `main` with #6/#7 acceptance criteria and verification evidence.**
