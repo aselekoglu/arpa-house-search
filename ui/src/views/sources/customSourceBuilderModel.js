@@ -118,6 +118,13 @@ export const sourceFormFromSource = (source) => {
   };
 };
 
+export const isSourceFormDirty = (form, source) => {
+  if (source == null) return true;
+  const persistedForm = sourceFormFromSource(source);
+  if (requiredText(form?.name) !== requiredText(persistedForm.name)) return true;
+  return JSON.stringify(recipeFromSourceForm(form ?? createEmptySourceForm())) !== JSON.stringify(recipeFromSourceForm(persistedForm));
+};
+
 export const coverageRowsFromReport = (report) => {
   const required = new Set(Array.isArray(report?.requiredFields) ? report.requiredFields : []);
   const coverage = report?.coverage && typeof report.coverage === 'object' ? report.coverage : {};
@@ -137,6 +144,7 @@ export const coverageRowsFromReport = (report) => {
 
 export const customSourceErrorMessage = (error) => {
   const body = error?.json ?? error ?? {};
+  if (typeof body === 'string' && body.length > 0) return body;
   const message = typeof body.message === 'string' && body.message.length > 0 ? body.message : 'Custom Source request failed';
   const context = [body.field, body.step].filter((value) => typeof value === 'string' && value.length > 0);
   return context.length > 0 ? `${message} — ${context.join(' · ')}` : message;
