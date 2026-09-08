@@ -20,11 +20,11 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn build:frontend
-      - name: Deterministic core tests
+      - name: Deterministic foundation/core tests
         run: >-
           node --import ./test/esmock-loader.mjs ./node_modules/mocha/bin/mocha.js
           --timeout 60000
+          test/arpa/foundation.test.js
           test/storage/SqliteConnection.test.js
-          test/db/migrations/migrate.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
