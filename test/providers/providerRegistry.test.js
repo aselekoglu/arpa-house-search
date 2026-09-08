@@ -33,7 +33,7 @@ describe('Provider Registry', () => {
     const invalidAdapters = [
       [{ ...adapter(), id: '' }, 'id'],
       [{ ...adapter(), name: '' }, 'name'],
-      [{ ...adapter(), domains: [] }, 'domains'],
+      [{ ...adapter(), domains: 'realtor.ca' }, 'domains'],
       [{ ...adapter(), discover: null }, 'discover'],
       [{ ...adapter(), normalize: null }, 'normalize'],
     ];
@@ -41,6 +41,22 @@ describe('Provider Registry', () => {
     for (const [candidate, field] of invalidAdapters) {
       expect(() => mod.validateProviderAdapter(candidate)).to.throw(mod.ProviderContractError).with.property('field', field);
     }
+  });
+
+  it('allows providers without fixed domains for explicit source configuration', async () => {
+    const mod = await loadProviderCore();
+    if (!mod) return;
+
+    const custom = adapter({
+      id: 'custom-source',
+      name: 'Custom Source',
+      domains: undefined,
+    });
+    const registry = new mod.ProviderRegistry([custom]);
+
+    expect(registry.get('custom-source')).to.equal(custom);
+    expect(registry.list()[0].domains).to.deep.equal([]);
+    expect(registry.resolveUrl('https://rentals.example.test/listing/1')).to.equal(null);
   });
 
   it('rejects duplicate provider ids and normalized domain ownership', async () => {
