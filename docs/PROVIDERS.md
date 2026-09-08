@@ -20,6 +20,7 @@ Planned/implemented by subsequent M1 provider tasks rather than this core PR:
 ```text
 lib/providers/adapters/realtor-ca.js
 lib/providers/adapters/custom-source.js
+lib/providers/custom-source/recipe.js
 lib/clients/realtor/client.js
 lib/clients/realtor/browserTransport.js
 lib/clients/realtor/errors.js
@@ -53,6 +54,12 @@ Realtor-specific formatting is resolved inside the adapter: monthly price string
 
 ## Generic Custom Source
 
-Generic Custom Source v1 supports a listing container plus selectors for title, price, URL, image, bedrooms, bathrooms and address. Static mode uses HTTP + Cheerio; dynamic mode uses the existing Puppeteer stack.
+`lib/providers/custom-source/recipe.js` defines the shared, strict Custom Source Recipe v1 contract consumed by the static extractor, browser extractor and Source Builder. Recipes are validated and normalized before activation; unknown keys are rejected so misspelled or unsupported configuration cannot silently change scraper behavior.
 
-Every new dedicated provider requires deterministic source identity, bounded pagination/concurrency, explicit errors, offline fixtures, and no anti-bot/challenge bypass logic.
+Recipe v1 requires `version: 1`, `mode: static|browser`, a public absolute HTTP(S) source `url`, and selectors for `listing`, `title`, `price` and `url`. Optional selectors are `image`, `beds`, `baths` and `address`. Selector strings are bounded and trimmed. Arbitrary request headers, cookies and credentials are intentionally not part of v1.
+
+Pagination supports only `none` and `next-button`. Disabled pagination is exactly one page. `next-button` requires a selector and uses a bounded `maxPages` value of 1–10, defaulting to 5. Browser mode supports only bounded navigation controls: `waitUntil` is one of Puppeteer's `load`, `domcontentloaded`, `networkidle0` or `networkidle2`; timeout is 1–30 seconds; and an optional `waitForSelector` may be provided. Static recipes reject browser-only options.
+
+Activation-time URL validation rejects non-HTTP(S) URLs, embedded credentials, localhost names, and literal private, loopback, link-local or IPv4-mapped IPv6 addresses. This is intentionally only the configuration-time boundary: #12/#13 network transports must also enforce public resolved addresses and redirects at request time so DNS resolution or redirect changes cannot turn an approved hostname into a private-network target.
+
+Static mode will use HTTP + Cheerio; browser mode will use the existing Puppeteer stack. Every new dedicated provider requires deterministic source identity, bounded pagination/concurrency, explicit errors, offline fixtures, and no anti-bot/challenge bypass logic.
