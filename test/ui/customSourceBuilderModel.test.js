@@ -7,6 +7,30 @@ try {
   model = null;
 }
 
+const storedSource = () => ({
+  id: 'source-1',
+  name: 'Ottawa manager',
+  enabled: false,
+  activation: { recipeValid: true, canEnable: true, needsRetest: false },
+  recipe: {
+    version: 1,
+    mode: 'static',
+    url: 'https://example.com/apartments',
+    selectors: {
+      listing: '.card',
+      title: '.name',
+      price: '.rent',
+      url: 'a',
+      image: '.photo',
+      beds: null,
+      baths: null,
+      address: '.address',
+    },
+    pagination: { type: 'none', maxPages: 1, nextSelector: null },
+    browser: null,
+  },
+});
+
 describe('Custom Source builder view model', () => {
   it('exports the builder model contract', () => {
     expect(model, 'Custom Source builder model should exist').to.not.equal(null);
@@ -15,6 +39,7 @@ describe('Custom Source builder view model', () => {
     expect(model).to.have.property('sourceFormFromSource').that.is.a('function');
     expect(model).to.have.property('coverageRowsFromReport').that.is.a('function');
     expect(model).to.have.property('customSourceErrorMessage').that.is.a('function');
+    expect(model).to.have.property('isSourceFormDirty').that.is.a('function');
   });
 
   it('creates a conservative static draft by default', () => {
@@ -78,29 +103,7 @@ describe('Custom Source builder view model', () => {
   });
 
   it('round-trips a stored source into editable form state', () => {
-    const form = model.sourceFormFromSource({
-      id: 'source-1',
-      name: 'Ottawa manager',
-      enabled: true,
-      activation: { recipeValid: true, canEnable: true, needsRetest: false },
-      recipe: {
-        version: 1,
-        mode: 'static',
-        url: 'https://example.com/apartments',
-        selectors: {
-          listing: '.card',
-          title: '.name',
-          price: '.rent',
-          url: 'a',
-          image: '.photo',
-          beds: null,
-          baths: null,
-          address: '.address',
-        },
-        pagination: { type: 'none', maxPages: 1, nextSelector: null },
-        browser: null,
-      },
-    });
+    const form = model.sourceFormFromSource({ ...storedSource(), enabled: true });
 
     expect(form).to.deep.include({
       sourceId: 'source-1',
@@ -114,6 +117,16 @@ describe('Custom Source builder view model', () => {
       canEnable: true,
       needsRetest: false,
     });
+  });
+
+  it('detects unsaved edits before activation while ignoring normalized no-op whitespace', () => {
+    const source = storedSource();
+    const form = model.sourceFormFromSource(source);
+
+    expect(model.isSourceFormDirty(form, source)).to.equal(false);
+    expect(model.isSourceFormDirty({ ...form, name: '  Ottawa manager  ' }, source)).to.equal(false);
+    expect(model.isSourceFormDirty({ ...form, priceSelector: '.monthly-rent' }, source)).to.equal(true);
+    expect(model.isSourceFormDirty({ ...form, name: 'Different manager' }, source)).to.equal(true);
   });
 
   it('marks required coverage rows from the backend report', () => {
