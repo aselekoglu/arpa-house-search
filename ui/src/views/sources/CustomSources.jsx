@@ -19,6 +19,7 @@ import {
   coverageRowsFromReport,
   createEmptySourceForm,
   customSourceErrorMessage,
+  isSourceFormDirty,
   recipeFromSourceForm,
   sourceFormFromSource,
 } from './customSourceBuilderModel.js';
@@ -61,7 +62,9 @@ const TestReport = ({ report }) => {
         <div>
           <div className="sourceBuilder__sectionEyebrow">TEST EXTRACTION</div>
           <h3>{report.totalRecords} listings found</h3>
-          <p>{report.pagesFetched} page{report.pagesFetched === 1 ? '' : 's'} fetched.</p>
+          <p>
+            {report.pagesFetched} page{report.pagesFetched === 1 ? '' : 's'} fetched.
+          </p>
         </div>
         <ArpaBadge>{report.activationReady ? 'Ready to enable' : 'Required coverage incomplete'}</ArpaBadge>
       </div>
@@ -133,21 +136,32 @@ export default function CustomSources() {
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
 
-  const selectedSource = useMemo(() => sources.find((source) => source.id === selectedId) ?? null, [sources, selectedId]);
+  const selectedSource = useMemo(
+    () => sources.find((source) => source.id === selectedId) ?? null,
+    [sources, selectedId],
+  );
+  const unsavedChanges = useMemo(
+    () => Boolean(selectedSource && isSourceFormDirty(form, selectedSource)),
+    [form, selectedSource],
+  );
 
-  const refreshSources = useCallback(async ({ selectId = selectedId } = {}) => {
-    const nextSources = await listCustomSources();
-    setSources(Array.isArray(nextSources) ? nextSources : []);
-    if (selectId) {
-      const nextSelected = nextSources.find((source) => source.id === selectId);
-      if (nextSelected) {
-        setSelectedId(nextSelected.id);
-        setForm(sourceFormFromSource(nextSelected));
-        return nextSelected;
+  const refreshSources = useCallback(
+    async ({ selectId = selectedId } = {}) => {
+      const nextSources = await listCustomSources();
+      const safeSources = Array.isArray(nextSources) ? nextSources : [];
+      setSources(safeSources);
+      if (selectId) {
+        const nextSelected = safeSources.find((source) => source.id === selectId);
+        if (nextSelected) {
+          setSelectedId(nextSelected.id);
+          setForm(sourceFormFromSource(nextSelected));
+          return nextSelected;
+        }
       }
-    }
-    return null;
-  }, [selectedId]);
+      return null;
+    },
+    [selectedId],
+  );
 
   useEffect(() => {
     let active = true;
@@ -155,11 +169,12 @@ export default function CustomSources() {
       try {
         const nextSources = await listCustomSources();
         if (!active) return;
-        setSources(Array.isArray(nextSources) ? nextSources : []);
-        if (nextSources?.length > 0) {
-          setSelectedId(nextSources[0].id);
-          setForm(sourceFormFromSource(nextSources[0]));
-          setReport(nextSources[0].lastTestReport ?? null);
+        const safeSources = Array.isArray(nextSources) ? nextSources : [];
+        setSources(safeSources);
+        if (safeSources.length > 0) {
+          setSelectedId(safeSources[0].id);
+          setForm(sourceFormFromSource(safeSources[0]));
+          setReport(safeSources[0].lastTestReport ?? null);
         }
       } catch (cause) {
         if (active) setError(customSourceErrorMessage(cause));
@@ -232,12 +247,19 @@ export default function CustomSources() {
       setReport(nextReport);
       const refreshed = await refreshSources({ selectId: saved.id });
       setForm(sourceFormFromSource(refreshed ?? saved));
-      setNotice(nextReport.activationReady ? 'Test passed. This exact recipe can now be enabled.' : 'Test completed, but required coverage is incomplete.');
+      setNotice(
+        nextReport.activationReady
+          ? 'Test passed. This exact recipe can now be enabled.'
+          : 'Test completed, but required coverage is incomplete.',
+      );
     });
 
   const toggleEnabled = () =>
     run(async () => {
       if (!selectedSource) return;
+      if (!selectedSource.enabled && unsavedChanges) {
+        throw new Error('Save the current edits before enabling this source.');
+      }
       const enabled = !selectedSource.enabled;
       const updated = await setCustomSourceEnabled(selectedSource.id, enabled);
       await refreshSources({ selectId: updated.id });
@@ -250,9 +272,10 @@ export default function CustomSources() {
     run(async () => {
       await deleteCustomSource(selectedSource.id);
       const nextSources = await listCustomSources();
-      setSources(nextSources);
-      if (nextSources.length > 0) {
-        selectSource(nextSources[0]);
+      const safeSources = Array.isArray(nextSources) ? nextSources : [];
+      setSources(safeSources);
+      if (safeSources.length > 0) {
+        selectSource(safeSources[0]);
       } else {
         newSource();
       }
@@ -260,7 +283,9 @@ export default function CustomSources() {
   };
 
   const activation = selectedSource?.activation ?? { recipeValid: false, canEnable: false, needsRetest: false };
-  const canEnable = Boolean(selectedSource && !selectedSource.enabled && activation.canEnable && !busy);
+  const canEnable = Boolean(
+    selectedSource && !selectedSource.enabled && activation.canEnable && !unsavedChanges && !busy,
+  );
 
   if (loading) {
     return (
@@ -309,12 +334,16 @@ export default function CustomSources() {
                 <div className="sourceBuilder__sectionEyebrow">SOURCE RECIPE</div>
                 <h2>{form.sourceId ? 'Edit Custom Source' : 'New Custom Source'}</h2>
               </div>
-              {selectedSource && <ArpaBadge>{sourceStateLabel(selectedSource)}</ArpaBadge>}
+              {selectedSource && <ArpaBadge>{unsavedChanges ? 'Unsaved changes' : sourceStateLabel(selectedSource)}</ArpaBadge>}
             </div>
 
             <div className="sourceBuilder__grid sourceBuilder__grid--two">
               <Field label="Source name">
-                <ArpaInput value={form.name} onChange={(value) => update('name', value)} placeholder="Example Property Management" />
+                <ArpaInput
+                  value={form.name}
+                  onChange={(value) => update('name', value)}
+                  placeholder="Example Property Management"
+                />
               </Field>
               <Field label="Execution mode" help="Use Browser only when the listing page needs JavaScript.">
                 <ArpaSelect
@@ -328,8 +357,15 @@ export default function CustomSources() {
               </Field>
             </div>
 
-            <Field label="Source URL" help="Only public HTTP(S) targets are accepted; private/local network targets are blocked.">
-              <ArpaInput value={form.url} onChange={(value) => update('url', value)} placeholder="https://example.com/ottawa-rentals" />
+            <Field
+              label="Source URL"
+              help="Only public HTTP(S) targets are accepted; private/local network targets are blocked."
+            >
+              <ArpaInput
+                value={form.url}
+                onChange={(value) => update('url', value)}
+                placeholder="https://example.com/ottawa-rentals"
+              />
             </Field>
 
             <div className="sourceBuilder__sectionHeading">
@@ -339,7 +375,11 @@ export default function CustomSources() {
             <div className="sourceBuilder__grid sourceBuilder__grid--two">
               {selectorFields.map(([field, label, help]) => (
                 <Field label={label} help={help} key={field}>
-                  <ArpaInput value={form[field]} onChange={(value) => update(field, value)} placeholder=".listing-card" />
+                  <ArpaInput
+                    value={form[field]}
+                    onChange={(value) => update(field, value)}
+                    placeholder=".listing-card"
+                  />
                 </Field>
               ))}
             </div>
@@ -362,10 +402,20 @@ export default function CustomSources() {
               {form.paginationType === 'next-button' && (
                 <>
                   <Field label="Maximum pages">
-                    <ArpaInput type="number" min="1" max="10" value={form.maxPages} onChange={(value) => update('maxPages', value)} />
+                    <ArpaInput
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={form.maxPages}
+                      onChange={(value) => update('maxPages', value)}
+                    />
                   </Field>
                   <Field label="Next button selector">
-                    <ArpaInput value={form.nextSelector} onChange={(value) => update('nextSelector', value)} placeholder=".pagination-next" />
+                    <ArpaInput
+                      value={form.nextSelector}
+                      onChange={(value) => update('nextSelector', value)}
+                      placeholder=".pagination-next"
+                    />
                   </Field>
                 </>
               )}
@@ -391,10 +441,20 @@ export default function CustomSources() {
                     />
                   </Field>
                   <Field label="Timeout (ms)">
-                    <ArpaInput type="number" min="1000" max="30000" value={form.timeoutMs} onChange={(value) => update('timeoutMs', value)} />
+                    <ArpaInput
+                      type="number"
+                      min="1000"
+                      max="30000"
+                      value={form.timeoutMs}
+                      onChange={(value) => update('timeoutMs', value)}
+                    />
                   </Field>
                   <Field label="Wait for selector" help="Optional extra readiness signal.">
-                    <ArpaInput value={form.waitForSelector} onChange={(value) => update('waitForSelector', value)} placeholder=".listing-card" />
+                    <ArpaInput
+                      value={form.waitForSelector}
+                      onChange={(value) => update('waitForSelector', value)}
+                      placeholder=".listing-card"
+                    />
                   </Field>
                 </div>
               </>
@@ -425,11 +485,13 @@ export default function CustomSources() {
               {busy && <Spin size="small" />}
             </div>
 
-            {selectedSource && !selectedSource.enabled && !activation.canEnable && (
+            {selectedSource && !selectedSource.enabled && (unsavedChanges || !activation.canEnable) && (
               <p className="sourceBuilder__activationHint">
-                {activation.needsRetest
-                  ? 'The recipe changed after its last test. Run Test Extraction again before enabling.'
-                  : 'Run a successful Test Extraction with full title, price and URL coverage before enabling.'}
+                {unsavedChanges
+                  ? 'Save the current edits before enabling. If the recipe changed, run Test Extraction again.'
+                  : activation.needsRetest
+                    ? 'The recipe changed after its last test. Run Test Extraction again before enabling.'
+                    : 'Run a successful Test Extraction with full title, price and URL coverage before enabling.'}
               </p>
             )}
           </ArpaPanel>
