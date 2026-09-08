@@ -3,7 +3,7 @@
 .sourceBuilder {
   display: flex;
   flex-direction: column;
-  gap: var(--arpa-space-5);
+  gap: 1.5rem;
 }
 
 .sourceBuilder__loading {
@@ -20,7 +20,7 @@
 }
 
 .sourceBuilder__sourceList {
-  padding: var(--arpa-space-4) var(--arpa-space-4) var(--arpa-space-4) 0;
+  padding: 1rem 1rem 1rem 0;
   border-right: 1px solid var(--arpa-line);
 }
 
@@ -30,7 +30,7 @@
   border: 0;
   border-bottom: 1px solid var(--arpa-line);
   background: transparent;
-  color: var(--arpa-text);
+  color: var(--arpa-ink);
   padding: 14px 10px;
   display: flex;
   align-items: flex-start;
@@ -42,7 +42,7 @@
 
 .sourceBuilder__sourceRow:hover,
 .sourceBuilder__sourceRow--active {
-  background: var(--arpa-surface-muted);
+  background: var(--arpa-surface-soft);
 }
 
 .sourceBuilder__sourceRow span:first-child {
@@ -57,7 +57,7 @@
 }
 
 .sourceBuilder__sourceRow small {
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -66,13 +66,14 @@
 
 .sourceBuilder__main {
   min-width: 0;
-  padding: var(--arpa-space-4) 0 var(--arpa-space-6) var(--arpa-space-5);
+  padding: 1rem 0 2rem 1.5rem;
 }
 
 .sourceBuilder__panel {
   display: flex;
   flex-direction: column;
-  gap: var(--arpa-space-5);
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 .sourceBuilder__panelHeader,
@@ -80,9 +81,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--arpa-space-4);
+  gap: 1rem;
   border-bottom: 1px solid var(--arpa-line);
-  padding-bottom: var(--arpa-space-4);
+  padding-bottom: 1rem;
 }
 
 .sourceBuilder__panelHeader h2,
@@ -93,11 +94,12 @@
 
 .sourceBuilder__reportHeader p {
   margin: 6px 0 0;
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
 }
 
 .sourceBuilder__sectionEyebrow {
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
+  font-family: var(--arpa-font-mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -105,12 +107,12 @@
 
 .sourceBuilder__sectionHeading {
   border-top: 1px solid var(--arpa-line);
-  padding-top: var(--arpa-space-4);
+  padding-top: 1rem;
 }
 
 .sourceBuilder__grid {
   display: grid;
-  gap: var(--arpa-space-4);
+  gap: 1rem;
 }
 
 .sourceBuilder__grid--two {
@@ -129,7 +131,7 @@
 }
 
 .sourceBuilder__fieldLabel {
-  color: var(--arpa-text);
+  color: var(--arpa-ink);
   font-size: 12px;
   font-weight: 650;
 }
@@ -137,7 +139,7 @@
 .sourceBuilder__fieldHelp,
 .sourceBuilder__muted,
 .sourceBuilder__activationHint {
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
   font-size: 11px;
   line-height: 1.45;
 }
@@ -148,7 +150,7 @@
   align-items: center;
   gap: 10px;
   border-top: 1px solid var(--arpa-line);
-  padding-top: var(--arpa-space-4);
+  padding-top: 1rem;
 }
 
 .sourceBuilder__activationHint {
@@ -156,12 +158,12 @@
 }
 
 .sourceBuilder__report {
-  margin-top: var(--arpa-space-5);
+  margin-top: 1.5rem;
   border-top: 1px solid var(--arpa-line);
-  padding-top: var(--arpa-space-5);
+  padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: var(--arpa-space-5);
+  gap: 1.5rem;
 }
 
 .sourceBuilder__coverage {
@@ -180,7 +182,7 @@
 
 .sourceBuilder__coverageRow strong {
   margin-left: 6px;
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -191,7 +193,7 @@
 }
 
 .sourceBuilder__coverageWarn {
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -220,7 +222,7 @@
 }
 
 .sourceBuilder__previewTable th {
-  color: var(--arpa-text-muted);
+  color: var(--arpa-muted);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
