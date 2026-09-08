@@ -31,6 +31,8 @@ jobs:
           --timeout 60000
           test/arpa/foundation.test.js
           test/domain/canonicalListing.test.js
+          test/domain/searchProfile.test.js
+          test/services/searchProfiles/profileExecutionContext.test.js
           test/providers/providerRegistry.test.js
           test/clients/realtor/realtorClient.test.js
           test/providers/realtorCaAdapter.test.js
