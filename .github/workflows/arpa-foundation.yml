@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'arpa/**'
+      - 'm1/**'
   pull_request:
     branches:
       - main
@@ -29,6 +30,8 @@ jobs:
           node --import ./test/esmock-loader.mjs ./node_modules/mocha/bin/mocha.js
           --timeout 60000
           test/arpa/foundation.test.js
+          test/domain/canonicalListing.test.js
+          test/providers/providerRegistry.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
