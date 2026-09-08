@@ -21,6 +21,9 @@ Planned/implemented by subsequent M1 provider tasks rather than this core PR:
 lib/providers/adapters/realtor-ca.js
 lib/providers/adapters/custom-source.js
 lib/providers/custom-source/recipe.js
+lib/providers/custom-source/errors.js
+lib/providers/custom-source/networkSafety.js
+lib/providers/custom-source/staticExtractor.js
 lib/clients/realtor/client.js
 lib/clients/realtor/browserTransport.js
 lib/clients/realtor/errors.js
@@ -60,6 +63,14 @@ Recipe v1 requires `version: 1`, `mode: static|browser`, a public absolute HTTP(
 
 Pagination supports only `none` and `next-button`. Disabled pagination is exactly one page. `next-button` requires a selector and uses a bounded `maxPages` value of 1–10, defaulting to 5. Browser mode supports only bounded navigation controls: `waitUntil` is one of Puppeteer's `load`, `domcontentloaded`, `networkidle0` or `networkidle2`; timeout is 1–30 seconds; and an optional `waitForSelector` may be provided. Static recipes reject browser-only options.
 
-Activation-time URL validation rejects non-HTTP(S) URLs, embedded credentials, localhost names, and literal private, loopback, link-local or IPv4-mapped IPv6 addresses. This is intentionally only the configuration-time boundary: #12/#13 network transports must also enforce public resolved addresses and redirects at request time so DNS resolution or redirect changes cannot turn an approved hostname into a private-network target.
+Activation-time URL validation rejects non-HTTP(S) URLs, embedded credentials, localhost names, and literal private, loopback, link-local or IPv4-mapped IPv6 addresses. Runtime fetchers use `networkSafety.js` to repeat public-target checks after DNS resolution and redirects; the HTTP transport also installs guarded socket lookup agents so a later DNS result cannot silently switch the connection onto a private address.
 
-Static mode will use HTTP + Cheerio; browser mode will use the existing Puppeteer stack. Every new dedicated provider requires deterministic source identity, bounded pagination/concurrency, explicit errors, offline fixtures, and no anti-bot/challenge bypass logic.
+### Static extractor
+
+`StaticCustomSourceExtractor` executes only validated `mode: static` recipes through sequential HTTP + Cheerio extraction. It returns source-native records shaped as `title`, `price`, `url`, `image`, `beds`, `baths`, `address` and `sourcePageUrl`; it deliberately does not perform canonical mapping. Missing listing fields are returned as `null`, which allows Test Extraction to report field coverage rather than losing the entire listing.
+
+Static pagination is deterministic and bounded by the normalized recipe. `none` fetches exactly one page. `next-button` follows the selected element's HTTP(S) `href` sequentially and stops when the selector disappears or `maxPages` is reached. A selected pagination element without an `href` is an explicit pagination error; JavaScript-only click pagination belongs to browser mode rather than being simulated in the static extractor.
+
+Network redirects are handled manually with a bounded redirect count. Every initial URL, pagination URL and redirect hop is re-validated and DNS-resolved before fetch, and the underlying HTTP(S) agents apply the same public-address policy during socket lookup. HTTP failures, resolution failures, redirect failures and invalid selector syntax surface as typed errors with attributable `step`/`field` metadata. Default CI uses injected fetch/DNS doubles and does not contact live rental sites.
+
+Browser mode will use the existing Puppeteer stack. Every new dedicated provider requires deterministic source identity, bounded pagination/concurrency, explicit errors, offline fixtures, and no anti-bot/challenge bypass logic.

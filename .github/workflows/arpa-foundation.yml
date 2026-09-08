@@ -36,6 +36,7 @@ jobs:
           test/providers/realtorCaAdapter.test.js
           test/fixtures/realtorFixtures.test.js
           test/providers/customSourceRecipe.test.js
+          test/providers/staticCustomSourceExtractor.test.js
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
