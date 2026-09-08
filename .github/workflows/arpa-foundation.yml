@@ -3,7 +3,11 @@ name: ARPA Foundation
 on:
   push:
     branches:
+      - main
       - 'arpa/**'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
