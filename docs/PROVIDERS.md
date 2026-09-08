@@ -36,6 +36,14 @@ The transport deliberately does not implement stealth, CAPTCHA solving, challeng
 
 Live network access is not part of deterministic CI. Realtor client tests use offline synthetic responses and an injected Puppeteer-compatible browser double. A manual/live probe can be run from the deployment environment when validating current Realtor.ca behavior.
 
+## Realtor.ca adapter
+
+`lib/providers/adapters/realtor-ca.js` is the only layer that knows Realtor.ca field names. `discover()` maps Search Profile v1 (`city`, `region`, `maxPrice`, `minBedrooms`, `minBathrooms`) plus provider-specific source overrides into `RealtorClient.searchRentals()` and returns source-native records. `normalize()` converts exactly one source-native record into Canonical Listing v1.
+
+Canonical source identity prefers Realtor's property `Id`; `MlsNumber` is only a fallback. Mutable fields such as price, description or bedroom count therefore do not create a new ARPA listing identity. Current mapping covers `Property.Price`, `Property.Address.AddressText`, coordinates, `Building.Bedrooms`, `Building.BathroomTotal`, `RelativeDetailsURL`, `Property.Photo` and `PublicRemarks`; the original source record is retained in `raw`.
+
+Realtor-specific formatting is resolved inside the adapter: monthly price strings become numeric CAD values, address pipe separators become a normalized display address, and bedroom strings such as `2 + 1` become a total bedroom count. Provider-independent consumers receive only Canonical Listing fields.
+
 ## Generic Custom Source
 
 Generic Custom Source v1 supports a listing container plus selectors for title, price, URL, image, bedrooms, bathrooms and address. Static mode uses HTTP + Cheerio; dynamic mode uses the existing Puppeteer stack.
