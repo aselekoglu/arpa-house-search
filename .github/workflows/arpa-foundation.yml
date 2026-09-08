@@ -41,6 +41,7 @@ jobs:
           test/providers/browserCustomSourceNetworkSafety.test.js
           test/services/customSources/sourceTestService.test.js
           test/services/customSources/sourceLifecycleService.test.js
+          test/services/customSources/sourceActivationPresentation.test.js
           test/storage/customSourceMigration.test.js
           test/storage/customSourceStorage.test.js
           test/api/customSourceRouter.test.js
