@@ -38,6 +38,8 @@ jobs:
           test/services/searchProfiles/searchProfileLifecycleService.test.js
           test/api/searchProfileRouter.test.js
           test/api/searchProfileApiRegistration.test.js
+          test/ui/searchProfileModel.test.js
+          test/ui/searchProfilesUiContract.test.js
           test/providers/providerRegistry.test.js
           test/clients/realtor/realtorClient.test.js
           test/providers/realtorCaAdapter.test.js
