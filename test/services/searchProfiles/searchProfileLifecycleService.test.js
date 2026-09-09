@@ -26,6 +26,17 @@ const createMemoryStorage = () => {
   };
 };
 
+const createCustomSourceStorage = (rows = [
+  { id: 'source-1', userId: 'user-a', enabled: true },
+]) => {
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return {
+    getById(id) {
+      return byId.get(id) ?? null;
+    },
+  };
+};
+
 const profileFields = (overrides = {}) => ({
   name: 'Ottawa 2BR',
   city: 'Ottawa',
@@ -59,6 +70,7 @@ describe('Search Profile lifecycle service', () => {
     const storage = createMemoryStorage();
     const service = mod.createSearchProfileLifecycleService({
       storage,
+      customSourceStorage: createCustomSourceStorage(),
       idFactory: () => 'profile-1',
       now: () => 1000,
     });
@@ -81,7 +93,11 @@ describe('Search Profile lifecycle service', () => {
       id: 'profile-2', userId: 'user-a', ...profileFields({ name: 'Before' }), createdAt: 500, updatedAt: 500,
     });
     let clock = 900;
-    const service = mod.createSearchProfileLifecycleService({ storage, now: () => clock++ });
+    const service = mod.createSearchProfileLifecycleService({
+      storage,
+      customSourceStorage: createCustomSourceStorage(),
+      now: () => clock++,
+    });
 
     const updated = service.saveProfile({
       userId: 'user-a',
@@ -101,7 +117,11 @@ describe('Search Profile lifecycle service', () => {
     const storage = createMemoryStorage();
     storage.rows.set('a-1', { id: 'a-1', userId: 'user-a', ...profileFields({ name: 'A' }), createdAt: 1, updatedAt: 10 });
     storage.rows.set('b-1', { id: 'b-1', userId: 'user-b', ...profileFields({ name: 'B' }), createdAt: 1, updatedAt: 20 });
-    const service = mod.createSearchProfileLifecycleService({ storage, now: () => 30 });
+    const service = mod.createSearchProfileLifecycleService({
+      storage,
+      customSourceStorage: createCustomSourceStorage(),
+      now: () => 30,
+    });
 
     expect(service.listProfiles({ userId: 'user-a' }).map((profile) => profile.id)).to.deep.equal(['a-1']);
     expect(service.getProfile({ userId: 'user-a', profileId: 'a-1' }).id).to.equal('a-1');
@@ -118,7 +138,11 @@ describe('Search Profile lifecycle service', () => {
     storage.rows.set('owned-by-b', {
       id: 'owned-by-b', userId: 'user-b', ...profileFields({ name: 'Private' }), createdAt: 100, updatedAt: 100,
     });
-    const service = mod.createSearchProfileLifecycleService({ storage, now: () => 200 });
+    const service = mod.createSearchProfileLifecycleService({
+      storage,
+      customSourceStorage: createCustomSourceStorage(),
+      now: () => 200,
+    });
 
     expect(() => service.getProfile({ userId: 'user-a', profileId: 'owned-by-b' })).to.throw(mod.SearchProfileOwnershipError);
     expect(() => service.saveProfile({ userId: 'user-a', profileId: 'owned-by-b', ...profileFields({ name: 'Hijack' }) })).to.throw(
@@ -127,11 +151,41 @@ describe('Search Profile lifecycle service', () => {
     expect(() => service.removeProfile({ userId: 'user-a', profileId: 'owned-by-b' })).to.throw(mod.SearchProfileOwnershipError);
   });
 
+  it('rejects Custom Source references that are missing or owned by another user', async () => {
+    const mod = await loadModule();
+    if (!mod) return;
+
+    const service = mod.createSearchProfileLifecycleService({
+      storage: createMemoryStorage(),
+      customSourceStorage: createCustomSourceStorage([
+        { id: 'source-1', userId: 'user-a', enabled: true },
+        { id: 'source-b', userId: 'user-b', enabled: true },
+      ]),
+      idFactory: () => 'profile-secure',
+      now: () => 400,
+    });
+
+    expect(() => service.saveProfile({
+      userId: 'user-a',
+      ...profileFields({ enabledSources: [{ kind: 'custom-source', id: 'source-b' }] }),
+    })).to.throw(mod.SearchProfileOwnershipError, /Custom Source/);
+
+    expect(() => service.saveProfile({
+      userId: 'user-a',
+      ...profileFields({ enabledSources: [{ kind: 'custom-source', id: 'missing-source' }] }),
+    })).to.throw(mod.SearchProfileOwnershipError, /Custom Source/);
+  });
+
   it('distinguishes missing profiles and validates every save through the domain contract', async () => {
     const mod = await loadModule();
     if (!mod) return;
 
-    const service = mod.createSearchProfileLifecycleService({ storage: createMemoryStorage(), idFactory: () => 'profile-x', now: () => 500 });
+    const service = mod.createSearchProfileLifecycleService({
+      storage: createMemoryStorage(),
+      customSourceStorage: createCustomSourceStorage(),
+      idFactory: () => 'profile-x',
+      now: () => 500,
+    });
     expect(() => service.getProfile({ userId: 'user-a', profileId: 'missing' })).to.throw(mod.SearchProfileNotFoundError);
     expect(() => service.removeProfile({ userId: 'user-a', profileId: 'missing' })).to.throw(mod.SearchProfileNotFoundError);
     expect(() => service.saveProfile({ userId: 'user-a', ...profileFields({ schedule: { enabled: true, intervalMinutes: 0 } }) })).to.throw(
