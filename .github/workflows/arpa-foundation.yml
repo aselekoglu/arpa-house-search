@@ -36,6 +36,8 @@ jobs:
           test/storage/searchProfileMigration.test.js
           test/storage/searchProfileStorage.test.js
           test/services/searchProfiles/searchProfileLifecycleService.test.js
+          test/api/searchProfileRouter.test.js
+          test/api/searchProfileApiRegistration.test.js
           test/providers/providerRegistry.test.js
           test/clients/realtor/realtorClient.test.js
           test/providers/realtorCaAdapter.test.js
