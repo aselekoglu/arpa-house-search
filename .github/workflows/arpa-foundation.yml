@@ -33,6 +33,9 @@ jobs:
           test/domain/canonicalListing.test.js
           test/domain/searchProfile.test.js
           test/services/searchProfiles/profileExecutionContext.test.js
+          test/storage/searchProfileMigration.test.js
+          test/storage/searchProfileStorage.test.js
+          test/services/searchProfiles/searchProfileLifecycleService.test.js
           test/providers/providerRegistry.test.js
           test/clients/realtor/realtorClient.test.js
           test/providers/realtorCaAdapter.test.js
