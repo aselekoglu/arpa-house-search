@@ -1,27 +1,33 @@
 import { expect } from 'chai';
+import { canonicalListingId } from '../../../lib/domain/listing/canonicalListing.js';
 
 const loadModule = async () => import('../../../lib/services/listingFeed/listingFeedService.js').catch(() => null);
 
-const canonical = (overrides = {}) => ({
-  id: 'listing-1',
-  providerId: 'realtor-ca',
-  sourceListingId: '28123456',
-  url: 'https://www.realtor.ca/real-estate/28123456/example',
-  title: 'Two bedroom',
-  price: 2200,
-  currency: 'CAD',
-  beds: 2,
-  baths: 1,
-  address: '123 Bank St',
-  latitude: null,
-  longitude: null,
-  imageUrl: null,
-  description: null,
-  raw: null,
-  firstSeen: 100,
-  lastSeen: 100,
-  ...overrides,
-});
+const canonical = (overrides = {}) => {
+  const listing = {
+    providerId: 'realtor-ca',
+    sourceListingId: '28123456',
+    url: 'https://www.realtor.ca/real-estate/28123456/example',
+    title: 'Two bedroom',
+    price: 2200,
+    currency: 'CAD',
+    beds: 2,
+    baths: 1,
+    address: '123 Bank St',
+    latitude: null,
+    longitude: null,
+    imageUrl: null,
+    description: null,
+    raw: null,
+    firstSeen: 100,
+    lastSeen: 100,
+    ...overrides,
+  };
+  return {
+    ...listing,
+    id: canonicalListingId(listing.providerId, listing.sourceListingId),
+  };
+};
 
 const memoryStorage = () => {
   const listings = new Map();
@@ -85,7 +91,7 @@ describe('Listing Feed service', () => {
     expect(result).to.deep.equal({ ingested: 1 });
     expect(storage.hits[0]).to.deep.include({
       profileId: 'profile-a',
-      listingId: 'listing-1',
+      listingId: canonicalListingId('realtor-ca', '28123456'),
       sourceKind: 'provider',
       sourceId: 'realtor-ca',
       sourceLabel: 'Realtor.ca',
@@ -127,7 +133,7 @@ describe('Listing Feed service', () => {
       userId: 'user-a',
       profileId: 'profile-a',
       source: { kind: 'custom-source', id: 'pm-1' },
-      listings: [canonical({ id: 'custom-1', providerId: 'custom-source:pm-1', sourceListingId: 'https://pm/1', url: 'https://pm/1' })],
+      listings: [canonical({ providerId: 'custom-source:pm-1', sourceListingId: 'https://pm/1', url: 'https://pm/1' })],
       seenAt: 700,
     });
     expect(storage.hits[0].sourceLabel).to.equal('Example PM');
@@ -137,7 +143,7 @@ describe('Listing Feed service', () => {
       userId: 'user-a',
       profileId: 'profile-a',
       source: { kind: 'custom-source', id: 'pm-1' },
-      listings: [canonical({ id: 'custom-2', providerId: 'custom-source:pm-1', sourceListingId: 'https://pm/2', url: 'https://pm/2' })],
+      listings: [canonical({ providerId: 'custom-source:pm-1', sourceListingId: 'https://pm/2', url: 'https://pm/2' })],
       seenAt: 800,
     })).to.throw(mod.ListingFeedSourceError);
   });
@@ -147,7 +153,8 @@ describe('Listing Feed service', () => {
     if (!mod) return;
 
     const storage = memoryStorage();
-    storage.listings.set('listing-1', canonical());
+    const item = canonical();
+    storage.listings.set(item.id, item);
     const searchProfiles = {
       getById() { return { id: 'profile-a', userId: 'user-a', enabledSources: [] }; },
     };
