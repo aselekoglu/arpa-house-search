@@ -114,6 +114,46 @@ describe('Canonical listing feed storage', () => {
     });
   });
 
+  it('returns Realtor.ca and Custom Source listings together in one Search Profile feed', () => {
+    if (!storage) return;
+
+    const realtor = listing({ id: 'realtor-1', sourceListingId: 'r-1', title: 'Realtor rental' });
+    const custom = listing({
+      id: 'custom-1',
+      providerId: 'custom-source:pm-1',
+      sourceListingId: 'https://pm.example/r/1',
+      url: 'https://pm.example/r/1',
+      title: 'Property manager rental',
+      price: 2050,
+    });
+
+    storage.upsertCanonicalListing(realtor);
+    storage.upsertProfileHit({
+      profileId: 'profile-a',
+      listingId: realtor.id,
+      sourceKind: 'provider',
+      sourceId: 'realtor-ca',
+      sourceLabel: 'Realtor.ca',
+      seenAt: 200,
+    });
+
+    storage.upsertCanonicalListing(custom);
+    storage.upsertProfileHit({
+      profileId: 'profile-a',
+      listingId: custom.id,
+      sourceKind: 'custom-source',
+      sourceId: 'pm-1',
+      sourceLabel: 'Example Property Manager',
+      seenAt: 300,
+    });
+
+    const feed = storage.queryProfileFeed({ profileId: 'profile-a', sort: 'newest' });
+    expect(feed.map((row) => [row.sourceKind, row.sourceId, row.sourceLabel, row.title])).to.deep.equal([
+      ['custom-source', 'pm-1', 'Example Property Manager', 'Property manager rental'],
+      ['provider', 'realtor-ca', 'Realtor.ca', 'Realtor rental'],
+    ]);
+  });
+
   it('sorts a profile feed by newest and price with unknown prices last', () => {
     if (!storage) return;
 
