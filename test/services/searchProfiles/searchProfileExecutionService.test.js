@@ -220,6 +220,31 @@ describe('Search Profile execution service', () => {
     expect(feedCalls[0].source).to.deep.equal({ kind: 'custom-source', id: 'pm-1' });
   });
 
+  it('releases the profile lock when run initialization fails before persistence', async () => {
+    const mod = await loadModule();
+    if (!mod) return;
+
+    const runStorage = memoryRunStorage();
+    const service = mod.createSearchProfileExecutionService({
+      searchProfileStorage: { getById() { return profile([]); } },
+      customSourceStorage: { getById() { return null; } },
+      providerRegistry: { get() { return null; } },
+      staticExtractor: { async extract() { return { records: [] }; } },
+      browserExtractor: { async extract() { return { records: [] }; } },
+      listingFeedService: { ingest() { return { ingested: 0 }; } },
+      runStorage,
+      idFactory() { throw new Error('id generation failed'); },
+    });
+
+    expect(() => service.execute({
+      userId: 'user-a',
+      profileId: 'profile-a',
+      trigger: 'manual',
+    })).to.throw('id generation failed');
+    expect(service.isRunning('profile-a')).to.equal(false);
+    expect(runStorage.runs.size).to.equal(0);
+  });
+
   it('rejects foreign profiles before creating a run record', async () => {
     const mod = await loadModule();
     if (!mod) return;
