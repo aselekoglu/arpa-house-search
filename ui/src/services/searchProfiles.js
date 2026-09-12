@@ -12,3 +12,6 @@ export const deleteSearchProfile = async (profileId) =>
 
 export const getSearchProfileExecutionContext = async (profileId) =>
   body(await xhrGet(`/api/searchProfiles/${profileId}/execution-context`));
+
+export const runSearchProfile = async (profileId) =>
+  body(await xhrPost(`/api/searchProfiles/${profileId}/run`, {}));

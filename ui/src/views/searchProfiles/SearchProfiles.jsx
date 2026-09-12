@@ -11,6 +11,7 @@ import { listCustomSources } from '../../services/customSources.js';
 import {
   deleteSearchProfile,
   listSearchProfiles,
+  runSearchProfile,
   saveSearchProfile,
 } from '../../services/searchProfiles.js';
 import {
@@ -139,6 +140,18 @@ export default function SearchProfiles() {
       await refreshProfiles({ selectId: saved.id });
       setNotice('Search Profile saved.');
     });
+
+  const runPersistedProfile = () => {
+    if (!selectedProfile) return;
+
+    run(async () => {
+      const result = await runSearchProfile(selectedProfile.id);
+      const sources = Array.isArray(result?.sources) ? result.sources : [];
+      const completed = sources.filter((source) => source.status === 'completed').length;
+      const failed = sources.filter((source) => source.status === 'failed').length;
+      setNotice(`Run completed — ${completed} source${completed === 1 ? '' : 's'} completed, ${failed} failed.`);
+    });
+  };
 
   const removeProfile = () => {
     if (!selectedProfile) return;
@@ -281,7 +294,7 @@ export default function SearchProfiles() {
                 />
                 <span>Enable schedule intent for this profile</span>
               </label>
-              <Field label="Interval (minutes)" help="Persisted now; scheduler integration is milestone task #18.">
+              <Field label="Interval (minutes)" help="The unified scheduler uses this interval for automatic runs.">
                 <ArpaInput
                   type="number"
                   min="1"
@@ -292,11 +305,14 @@ export default function SearchProfiles() {
               </Field>
             </div>
             <p className="searchProfiles__scheduleNote">
-              Automatic execution is not wired yet. This setting records the intended cadence so #18 can consume it without changing the profile schema.
+              Automatic execution uses the same run pipeline as Run Now. Disable the schedule to keep this profile manual-only.
             </p>
 
             <div className="searchProfiles__actions">
               <ArpaButton disabled={busy} onClick={persistProfile}>Save Profile</ArpaButton>
+              {selectedProfile ? (
+                <ArpaButton disabled={busy} onClick={runPersistedProfile}>Run Now</ArpaButton>
+              ) : null}
               {selectedProfile ? (
                 <ArpaButton variant="danger" disabled={busy} onClick={removeProfile}>Delete Profile</ArpaButton>
               ) : null}

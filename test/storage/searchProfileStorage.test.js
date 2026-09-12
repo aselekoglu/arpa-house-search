@@ -108,6 +108,34 @@ describe('Search Profile storage', () => {
     expect(updated.schedule).to.deep.equal({ enabled: true, intervalMinutes: 60 });
   });
 
+  it('lists only profiles whose persisted schedule is enabled', () => {
+    if (!storage) return;
+
+    storage.upsert({
+      id: 'scheduled-a', userId: 'user-a', name: 'Scheduled A', city: 'Ottawa', region: 'ON',
+      maxPrice: null, minBedrooms: null, minBathrooms: null,
+      enabledSources: [], schedule: { enabled: true, intervalMinutes: 15 },
+      createdAt: 260, updatedAt: 260,
+    });
+    storage.upsert({
+      id: 'manual-a', userId: 'user-a', name: 'Manual A', city: 'Ottawa', region: 'ON',
+      maxPrice: null, minBedrooms: null, minBathrooms: null,
+      enabledSources: [], schedule: { enabled: false, intervalMinutes: 15 },
+      createdAt: 270, updatedAt: 270,
+    });
+    storage.upsert({
+      id: 'scheduled-b', userId: 'user-b', name: 'Scheduled B', city: 'Ottawa', region: 'ON',
+      maxPrice: null, minBedrooms: null, minBathrooms: null,
+      enabledSources: [], schedule: { enabled: true, intervalMinutes: 30 },
+      createdAt: 280, updatedAt: 280,
+    });
+
+    expect(storage.listScheduled().map((profile) => profile.id)).to.deep.equal([
+      'scheduled-b',
+      'scheduled-a',
+    ]);
+  });
+
   it('removes profiles and lets the user FK cascade clean up owned rows', () => {
     if (!storage) return;
 
