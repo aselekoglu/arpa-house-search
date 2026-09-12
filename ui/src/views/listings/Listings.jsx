@@ -188,7 +188,16 @@ export default function Listings() {
                       className={`listingFeed__card ${selected ? 'listingFeed__card--selected' : ''}`.trim()}
                       key={id}
                       data-listing-id={id}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={selected}
                       onClick={() => setSelectedListingId(id)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setSelectedListingId(id);
+                        }
+                      }}
                     >
                       <div className="listingFeed__imageWrap">
                         <img
