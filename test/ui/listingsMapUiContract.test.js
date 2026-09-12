@@ -32,5 +32,8 @@ describe('Listings Map UI integration', () => {
     expect(view).to.include('data-listing-id');
     expect(view).to.include('scrollIntoView');
     expect(view).to.include('listingFeed__card--selected');
+    expect(view).to.include('tabIndex={0}');
+    expect(view).to.include("event.key === 'Enter'");
+    expect(view).to.include("event.key === ' '");
   });
 });
