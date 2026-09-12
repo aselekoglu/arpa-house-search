@@ -13,6 +13,7 @@ import { bus } from './lib/services/events/event-bus.js';
 import { initActiveCheckerCron } from './lib/services/crons/listing-alive-cron.js';
 import { getSettings } from './lib/services/storage/settingsStorage.js';
 import SqliteConnection from './lib/services/storage/SqliteConnection.js';
+import { searchProfileScheduler } from './lib/services/searchProfiles/searchProfileRuntime.js';
 
 const isConfigAccessible = await checkIfConfigIsAccessible();
 await SqliteConnection.init();
@@ -39,6 +40,10 @@ similarityCache.initSimilarityCache();
 similarityCache.startSimilarityCacheReloader();
 
 const INTERVAL = settings.interval * 60 * 1000;
+const ARPA_PROFILE_SCHEDULER_INTERVAL_MS = Number.parseInt(
+  process.env.ARPA_PROFILE_SCHEDULER_INTERVAL_MS ?? '60000',
+  10,
+);
 
 await import('./lib/api/api.js');
 
@@ -89,3 +94,21 @@ const execute = () => {
 
 setInterval(execute, INTERVAL);
 execute();
+
+
+const runSearchProfileScheduler = () =>
+  searchProfileScheduler
+    .tick()
+    .then((result) => {
+      if (result.due > 0) {
+        logger.info(
+          `Search Profile scheduler checked ${result.checked} profiles; ${result.completed} completed, ${result.failed} failed.`,
+        );
+      }
+    })
+    .catch((error) => logger.error('Search Profile scheduler tick failed', error));
+
+if (process.env.VERCEL !== '1') {
+  setInterval(runSearchProfileScheduler, ARPA_PROFILE_SCHEDULER_INTERVAL_MS);
+  runSearchProfileScheduler();
+}
