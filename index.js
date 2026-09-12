@@ -97,9 +97,7 @@ execute();
 
 
 const runSearchProfileScheduler = () =>
-  searchProfileScheduler
-    .tick()
-    .then((result) => {
+  searchProfileScheduler.tick().then((result) => {
       if (result.due > 0) {
         logger.info(
           `Search Profile scheduler checked ${result.checked} profiles; ${result.completed} completed, ${result.failed} failed.`,
