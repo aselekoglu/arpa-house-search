@@ -9,12 +9,14 @@ import {
 } from '../../components/arpa/index.js';
 import { getListingFeed } from '../../services/listingFeed.js';
 import { listSearchProfiles } from '../../services/searchProfiles.js';
+import ListingMap from './ListingMap.jsx';
 import {
   LISTING_FEED_SORT_OPTIONS,
   formatListingFreshness,
   formatListingPrice,
   listingFeedErrorMessage,
 } from './listingFeedModel.js';
+import { listingCanonicalId } from './listingMapModel.js';
 import './Listings.less';
 
 const listingTitle = (listing) =>
@@ -32,6 +34,7 @@ export default function Listings() {
   const [selectedProfileId, setSelectedProfileId] = useState('');
   const [sort, setSort] = useState('newest');
   const [listings, setListings] = useState([]);
+  const [selectedListingId, setSelectedListingId] = useState(null);
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [feedLoading, setFeedLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -65,6 +68,7 @@ export default function Listings() {
   useEffect(() => {
     if (!selectedProfileId) {
       setListings([]);
+      setSelectedListingId(null);
       setFeedLoading(false);
       return undefined;
     }
@@ -75,11 +79,23 @@ export default function Listings() {
 
     getListingFeed({ profileId: selectedProfileId, sort })
       .then((result) => {
-        if (active) setListings(Array.isArray(result) ? result : []);
+        if (!active) return;
+        const nextListings = Array.isArray(result) ? result : [];
+        setListings(nextListings);
+        setSelectedListingId((current) => {
+          if (
+            current &&
+            nextListings.some((listing) => listingCanonicalId(listing) === current)
+          ) {
+            return current;
+          }
+          return listingCanonicalId(nextListings[0]) ?? null;
+        });
       })
       .catch((cause) => {
         if (active) {
           setListings([]);
+          setSelectedListingId(null);
           setError(listingFeedErrorMessage(cause));
         }
       })
@@ -91,6 +107,12 @@ export default function Listings() {
       active = false;
     };
   }, [selectedProfileId, sort]);
+
+  useEffect(() => {
+    if (!selectedListingId) return;
+    const card = document.querySelector(`[data-listing-id="${selectedListingId}"]`);
+    card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [selectedListingId]);
 
   if (profilesLoading) {
     return (
@@ -155,60 +177,76 @@ export default function Listings() {
               No listings found for this Search Profile
             </ArpaPanel>
           ) : (
-            <div className="listingFeed__grid">
-              {listings.map((listing) => {
-                const facts = listingFacts(listing);
-                return (
-                  <article className="listingFeed__card" key={listing.listingId ?? listing.id}>
-                    <div className="listingFeed__imageWrap">
-                      <img
-                        className="listingFeed__image"
-                        src={listing.imageUrl || noImage}
-                        alt=""
-                        loading="lazy"
-                        onError={(event) => {
-                          if (event.currentTarget.src !== noImage) event.currentTarget.src = noImage;
-                        }}
-                      />
-                      <div className="listingFeed__freshness">
-                        <ArpaBadge>{formatListingFreshness(listing.firstSeen)}</ArpaBadge>
-                      </div>
-                    </div>
-
-                    <div className="listingFeed__body">
-                      <div className="listingFeed__meta">
-                        <strong className="listingFeed__price">
-                          {formatListingPrice(listing.price, listing.currency)}
-                        </strong>
-                        <span className="listingFeed__source">{listing.sourceLabel}</span>
-                      </div>
-
-                      <h2 className="listingFeed__title">{listingTitle(listing)}</h2>
-
-                      {facts.length > 0 ? (
-                        <div className="listingFeed__facts">
-                          {facts.map((fact) => <span key={fact}>{fact}</span>)}
+            <div className="listingFeed__workspace">
+              <div className="listingFeed__grid">
+                {listings.map((listing) => {
+                  const facts = listingFacts(listing);
+                  const id = listingCanonicalId(listing);
+                  const selected = id === selectedListingId;
+                  return (
+                    <article
+                      className={`listingFeed__card ${selected ? 'listingFeed__card--selected' : ''}`.trim()}
+                      key={id}
+                      data-listing-id={id}
+                      onClick={() => setSelectedListingId(id)}
+                    >
+                      <div className="listingFeed__imageWrap">
+                        <img
+                          className="listingFeed__image"
+                          src={listing.imageUrl || noImage}
+                          alt=""
+                          loading="lazy"
+                          onError={(event) => {
+                            if (event.currentTarget.src !== noImage) event.currentTarget.src = noImage;
+                          }}
+                        />
+                        <div className="listingFeed__freshness">
+                          <ArpaBadge>{formatListingFreshness(listing.firstSeen)}</ArpaBadge>
                         </div>
-                      ) : null}
-
-                      <p className="listingFeed__address">
-                        {listing.address || 'Address unavailable'}
-                      </p>
-
-                      <div className="listingFeed__footer">
-                        <a
-                          className="listingFeed__link"
-                          href={listing.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Open listing
-                        </a>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
+
+                      <div className="listingFeed__body">
+                        <div className="listingFeed__meta">
+                          <strong className="listingFeed__price">
+                            {formatListingPrice(listing.price, listing.currency)}
+                          </strong>
+                          <span className="listingFeed__source">{listing.sourceLabel}</span>
+                        </div>
+
+                        <h2 className="listingFeed__title">{listingTitle(listing)}</h2>
+
+                        {facts.length > 0 ? (
+                          <div className="listingFeed__facts">
+                            {facts.map((fact) => <span key={fact}>{fact}</span>)}
+                          </div>
+                        ) : null}
+
+                        <p className="listingFeed__address">
+                          {listing.address || 'Address unavailable'}
+                        </p>
+
+                        <div className="listingFeed__footer">
+                          <a
+                            className="listingFeed__link"
+                            href={listing.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            Open listing
+                          </a>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <ListingMap
+                listings={listings}
+                selectedListingId={selectedListingId}
+                onSelectListing={setSelectedListingId}
+              />
             </div>
           )}
         </>
