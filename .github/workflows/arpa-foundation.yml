@@ -61,6 +61,9 @@ jobs:
           test/api/listingFeedApiRegistration.test.js
           test/ui/listingFeedModel.test.js
           test/ui/listingsFeedUiContract.test.js
+          test/ui/listingMapModel.test.js
+          test/ui/listingMapRuntimeContract.test.js
+          test/ui/listingsMapUiContract.test.js
           test/storage/searchProfileRunMigration.test.js
           test/storage/searchProfileRunStorage.test.js
           test/services/searchProfiles/searchProfileExecutionService.test.js
