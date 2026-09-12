@@ -48,11 +48,15 @@ jobs:
           test/providers/staticCustomSourceExtractor.test.js
           test/providers/browserCustomSourceExtractor.test.js
           test/providers/browserCustomSourceNetworkSafety.test.js
+          test/providers/customSourceCanonicalMapper.test.js
           test/services/customSources/sourceTestService.test.js
           test/services/customSources/sourceLifecycleService.test.js
           test/services/customSources/sourceActivationPresentation.test.js
           test/storage/customSourceMigration.test.js
           test/storage/customSourceStorage.test.js
+          test/storage/listingFeedMigration.test.js
+          test/storage/canonicalListingStorage.test.js
+          test/services/listingFeed/listingFeedService.test.js
           test/api/customSourceRouter.test.js
           test/api/customSourceApiRegistration.test.js
           test/ui/customSourceBuilderModel.test.js
