@@ -17,7 +17,7 @@ describe('Search Profiles UI integration', () => {
     expect(page, 'Search Profiles workspace should exist').to.be.a('string');
     expect(api, 'Search Profiles API client should exist').to.be.a('string');
 
-    for (const text of ['New Profile', 'Save Profile', 'Delete Profile', 'Realtor.ca', 'Automatic execution is not wired yet']) {
+    for (const text of ['New Profile', 'Save Profile', 'Delete Profile', 'Realtor.ca', 'Automatic execution uses the same run pipeline as Run Now']) {
       expect(page).to.include(text);
     }
     expect(page).to.include('listCustomSources');
