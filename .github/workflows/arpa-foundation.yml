@@ -57,6 +57,10 @@ jobs:
           test/storage/listingFeedMigration.test.js
           test/storage/canonicalListingStorage.test.js
           test/services/listingFeed/listingFeedService.test.js
+          test/api/listingFeedRouter.test.js
+          test/api/listingFeedApiRegistration.test.js
+          test/ui/listingFeedModel.test.js
+          test/ui/listingsFeedUiContract.test.js
           test/api/customSourceRouter.test.js
           test/api/customSourceApiRegistration.test.js
           test/ui/customSourceBuilderModel.test.js
