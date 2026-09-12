@@ -148,6 +148,45 @@ describe('Listing Feed service', () => {
     })).to.throw(mod.ListingFeedSourceError);
   });
 
+  it('validates an entire ingest batch before persisting any listing', async () => {
+    const mod = await loadModule();
+    if (!mod) return;
+
+    const storage = memoryStorage();
+    const searchProfiles = {
+      getById() {
+        return {
+          id: 'profile-a',
+          userId: 'user-a',
+          enabledSources: [{ kind: 'provider', id: 'realtor-ca' }],
+        };
+      },
+    };
+    const service = mod.createListingFeedService({
+      storage,
+      searchProfileStorage: searchProfiles,
+      customSourceStorage: { getById() { return null; } },
+    });
+
+    expect(() => service.ingest({
+      userId: 'user-a',
+      profileId: 'profile-a',
+      source: { kind: 'provider', id: 'realtor-ca' },
+      listings: [
+        canonical({ sourceListingId: 'valid-1', url: 'https://www.realtor.ca/valid-1' }),
+        canonical({
+          providerId: 'another-provider',
+          sourceListingId: 'wrong-2',
+          url: 'https://example.test/wrong-2',
+        }),
+      ],
+      seenAt: 900,
+    })).to.throw(mod.ListingFeedSourceError);
+
+    expect(storage.listings.size).to.equal(0);
+    expect(storage.hits).to.have.length(0);
+  });
+
   it('queries only an owned Search Profile and passes through supported sort modes', async () => {
     const mod = await loadModule();
     if (!mod) return;
