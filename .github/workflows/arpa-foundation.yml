@@ -61,6 +61,7 @@ jobs:
           test/api/listingFeedApiRegistration.test.js
           test/ui/listingFeedModel.test.js
           test/ui/listingsFeedUiContract.test.js
+          test/e2e/m1OttawaVerticalSlice.test.js
           test/ui/listingMapModel.test.js
           test/ui/listingMapRuntimeContract.test.js
           test/ui/listingsMapUiContract.test.js
