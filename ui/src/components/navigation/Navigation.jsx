@@ -1,48 +1,27 @@
 import React from 'react';
 import { Nav } from '@douyinfe/semi-ui';
-import { IconStar, IconSetting, IconTerminal } from '@douyinfe/semi-icons';
+import { IconStar } from '@douyinfe/semi-icons';
 import Logout from '../logout/Logout.jsx';
 import Logo from '../logo/Logo.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 import './Navigate.less';
 import { useScreenWidth } from '../../hooks/screenWidth.js';
-import { useFeature } from '../../hooks/featureHook.js';
 
-export default function Navigation({ isAdmin }) {
+export default function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
   const width = useScreenWidth();
   const collapsed = width <= 850;
-  const watchlistFeature = useFeature('WATCHLIST_MANAGEMENT') || false;
 
   const items = [
-    { itemKey: '/jobs', text: 'Searches', icon: <IconTerminal /> },
-    { itemKey: '/searchProfiles', text: 'Search Profiles' },
     { itemKey: '/listings', text: 'Listings', icon: <IconStar /> },
+    { itemKey: '/searchProfiles', text: 'Search Profiles' },
     { itemKey: '/sources', text: 'Sources' },
   ];
 
-  if (isAdmin) {
-    const settingsItems = [
-      { itemKey: '/users', text: 'User Management' },
-      { itemKey: '/generalSettings', text: 'General Settings' },
-    ];
-    if (watchlistFeature) {
-      settingsItems.push({ itemKey: '/watchlistManagement', text: 'Watchlist Management' });
-    }
-
-    items.push({
-      itemKey: 'settings',
-      text: 'Settings',
-      icon: <IconSetting />,
-      items: settingsItems,
-    });
-  }
-
   function parsePathName(name) {
     const split = name.split('/').filter((s) => s.length !== 0);
-    return '/' + split[0];
+    return '/' + (split[0] || 'listings');
   }
 
   return (
