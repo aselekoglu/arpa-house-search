@@ -256,6 +256,4 @@ service.get('/api/cron/search-profiles', async (req, res) => {
 
 service.use(files(path.join(dirname, 'ui', 'public'), { index: ['index.html'] }));
 
-service.start(PORT).then(() => {
-  console.info(`ARPA House Search production server listening on port ${PORT}`);
-});
+await service.start(PORT);
