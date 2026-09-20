@@ -1,126 +1,61 @@
 import React, { useEffect } from 'react';
-
-import InsufficientPermission from './components/permission/InsufficientPermission';
-import PermissionAwareRoute from './components/permission/PermissionAwareRoute';
-import GeneralSettings from './views/generalSettings/GeneralSettings';
-import JobMutation from './views/jobs/mutation/JobMutation';
-import UserMutator from './views/user/mutation/UserMutator';
-import JobInsight from './views/jobs/insights/JobInsight.jsx';
-import { useActions, useSelector } from './services/state/store';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Divider, Layout } from '@douyinfe/semi-ui';
+import { useActions, useSelector } from './services/state/store';
 import Login from './views/login/Login';
-import Users from './views/user/Users';
-import Jobs from './views/jobs/Jobs';
 import CustomSources from './views/sources/CustomSources.jsx';
 import SearchProfiles from './views/searchProfiles/SearchProfiles.jsx';
-
-import './App.less';
-import { Banner, Divider, Layout } from '@douyinfe/semi-ui';
 import Listings from './views/listings/Listings.jsx';
 import Navigation from './components/navigation/Navigation.jsx';
 import ArpaFooter from './components/footer/ArpaFooter.jsx';
-import ProcessingTimes from './views/jobs/ProcessingTimes.jsx';
-import WatchlistManagement from './views/listings/management/WatchlistManagement.jsx';
+import './App.less';
 
 export default function ArpaHouseSearchApp() {
   const actions = useActions();
   const [loading, setLoading] = React.useState(true);
   const currentUser = useSelector((state) => state.user.currentUser);
-  const settings = useSelector((state) => state.generalSettings.settings);
-  const processingTimes = useSelector((state) => state.jobs.processingTimes);
-
-  useEffect(() => {
-    async function init() {
-      await actions.user.getCurrentUser();
-      if (!needsLogin()) {
-        await actions.features.getFeatures();
-        await actions.provider.getProvider();
-        await actions.jobs.getJobs();
-        await actions.jobs.getProcessingTimes();
-        await actions.jobs.getSharableUserList();
-        await actions.notificationAdapter.getAdapter();
-        await actions.generalSettings.getGeneralSettings();
-      }
-      setLoading(false);
-    }
-
-    init();
-  }, [currentUser?.userId]);
-
-  const needsLogin = () => currentUser == null || Object.keys(currentUser).length === 0;
-  const isAdmin = () => currentUser != null && currentUser.isAdmin;
   const { Footer, Sider, Content } = Layout;
 
-  return loading ? null : needsLogin() ? (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  ) : (
+  useEffect(() => {
+    let active = true;
+    actions.user
+      .getCurrentUser()
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const needsLogin = () => currentUser == null || Object.keys(currentUser).length === 0;
+
+  if (loading) return null;
+
+  if (needsLogin()) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
     <Layout className="app">
       <Layout className="app">
         <Sider>
-          <Navigation isAdmin={isAdmin()} />
+          <Navigation />
         </Sider>
         <Content>
-          {settings.demoMode && (
-            <>
-              <Banner
-                fullMode={true}
-                type="info"
-                bordered
-                closeIcon={null}
-                description="You're viewing ARPA House Search in demo mode. Search jobs do not crawl live websites and demo changes are reset at midnight."
-              />
-              <br />
-            </>
-          )}
-          {processingTimes != null && <ProcessingTimes processingTimes={processingTimes} />}
           <Divider />
           <div className="app__content">
             <Routes>
-              <Route path="/403" element={<InsufficientPermission />} />
-              <Route path="/jobs/new" element={<JobMutation />} />
-              <Route path="/jobs/edit/:jobId" element={<JobMutation />} />
-              <Route path="/jobs/insights/:jobId" element={<JobInsight />} />
-              <Route path="/jobs" element={<Jobs />} />
               <Route path="/listings" element={<Listings />} />
               <Route path="/sources" element={<CustomSources />} />
               <Route path="/searchProfiles" element={<SearchProfiles />} />
-              <Route path="/watchlistManagement" element={<WatchlistManagement />} />
-              <Route
-                path="/users/new"
-                element={
-                  <PermissionAwareRoute currentUser={currentUser}>
-                    <UserMutator />
-                  </PermissionAwareRoute>
-                }
-              />
-              <Route
-                path="/users/edit/:userId"
-                element={
-                  <PermissionAwareRoute currentUser={currentUser}>
-                    <UserMutator />
-                  </PermissionAwareRoute>
-                }
-              />
-              <Route
-                path="/users"
-                element={
-                  <PermissionAwareRoute currentUser={currentUser}>
-                    <Users />
-                  </PermissionAwareRoute>
-                }
-              />
-              <Route
-                path="/generalSettings"
-                element={
-                  <PermissionAwareRoute currentUser={currentUser}>
-                    <GeneralSettings />
-                  </PermissionAwareRoute>
-                }
-              />
-              <Route path="/" element={<Navigate to="/jobs" replace />} />
+              <Route path="/" element={<Navigate to="/listings" replace />} />
+              <Route path="*" element={<Navigate to="/listings" replace />} />
             </Routes>
           </div>
         </Content>
