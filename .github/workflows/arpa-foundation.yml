@@ -79,3 +79,5 @@ jobs:
           test/storage/SqliteConnection.test.js
           test/similarity/similarityCache.test.js
           test/utils/utils.test.js
+          test/production/neonSql.test.js
+          test/production/vercelPrivateContract.test.js
