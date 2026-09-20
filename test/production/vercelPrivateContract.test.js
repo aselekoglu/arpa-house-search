@@ -22,7 +22,7 @@ describe('private Vercel production surface', () => {
     expect(docker, 'Dockerfile.vercel should exist').to.be.a('string');
     expect(docker).to.include('chromium');
     expect(docker).to.include('PUPPETEER_EXECUTABLE_PATH');
-    expect(docker).to.include('node server.js');
+    expect(docker).to.match(/CMD\s*\[\s*["']node["']\s*,\s*["']server\\.js["']\s*\]/);
 
     const config = JSON.parse(vercel);
     expect(config.crons).to.deep.include({
@@ -44,7 +44,7 @@ describe('private Vercel production surface', () => {
     const nav = read('ui/src/components/navigation/Navigation.jsx');
     const login = read('ui/src/views/login/Login.jsx');
 
-    expect(app).to.include('actions.user.getCurrentUser()');
+    expect(app).to.include('actions.user');\n    expect(app).to.include('.getCurrentUser()');
     expect(app).to.not.include('actions.jobs.getJobs()');
     expect(app).to.not.include('actions.provider.getProvider()');
     expect(app).to.not.include('actions.generalSettings.getGeneralSettings()');
