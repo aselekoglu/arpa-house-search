@@ -6,6 +6,7 @@ on:
       - main
       - 'arpa/**'
       - 'm1/**'
+      - 'deploy/**'
   pull_request:
     branches:
       - main
